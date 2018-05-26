@@ -1,0 +1,25 @@
+use ::schema::games;
+
+#[derive(Queryable)]
+pub struct Game {
+    pub id: i32,
+    pub board: String,
+    pub board_width: i32,
+    pub board_height: i32,
+    pub turn_count: i32,
+    pub pieces: String,
+    pub channel_id: String,
+    pub player_turn_id: Option<i32>
+}
+
+#[derive(Insertable)]
+#[table_name="games"]
+pub struct NewGame<'a> {
+    pub board: &'a str,
+    pub board_width: i32,
+    pub board_height: i32,
+    pub turn_count: i32,
+    pub pieces: &'a str,
+    pub channel_id: &'a str,
+    pub player_turn_id: Option<i32>
+}

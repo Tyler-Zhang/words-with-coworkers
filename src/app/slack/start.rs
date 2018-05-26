@@ -1,15 +1,9 @@
-use super::{SlackCommand, SlackResponse};
 use diesel::PgConnection;
+use super::{SlackCommand, SlackResponse};
+use ::operations::game_operations;
 
 pub fn start(command: &SlackCommand, db: &PgConnection) -> SlackResponse {
-  let help_message = "\
-  Here is how you use the scrabbler:
+    let game = game_operations::create_game(db, &command.channel_id);
 
-/scrabbler help - Brings up this help dialogue
-/scrabbler start - Start a game with the person you're chatting to
-/scrabbler quit - Quit the current game
-  ";
-
-
-  SlackResponse { text: help_message.to_string(), response_type: Some("ephemeral".to_string()) }
+    SlackResponse { text: format!("created new game with id {}", game.id), response_type: Some("ephemeral".to_string()) }
 }

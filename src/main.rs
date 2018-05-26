@@ -23,6 +23,9 @@ extern crate r2d2_diesel;
 #[macro_use]
 extern crate dotenv_codegen;
 
+pub mod models;
+pub mod schema;
+pub mod operations;
 mod app;
 
 fn main() {

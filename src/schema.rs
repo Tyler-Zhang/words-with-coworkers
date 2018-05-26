@@ -2,10 +2,12 @@ table! {
     games (id) {
         id -> Int4,
         board -> Bpchar,
+        board_width -> Int4,
+        board_height -> Int4,
         turn_count -> Int4,
         pieces -> Varchar,
         channel_id -> Varchar,
-        player_turn_id -> Int4,
+        player_turn_id -> Nullable<Int4>,
     }
 }
 
@@ -18,8 +20,6 @@ table! {
         points -> Int4,
     }
 }
-
-joinable!(players -> games (game_id));
 
 allow_tables_to_appear_in_same_query!(
     games,

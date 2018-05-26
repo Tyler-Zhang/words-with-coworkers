@@ -15,6 +15,14 @@ extern crate failure;
 #[macro_use]
 extern crate failure_derive;
 
+#[macro_use]
+extern crate diesel;
+extern crate r2d2;
+extern crate r2d2_diesel;
+
+#[macro_use]
+extern crate dotenv_codegen;
+
 mod app;
 
 fn main() {

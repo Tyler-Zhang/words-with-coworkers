@@ -1,6 +1,7 @@
 use super::{SlackCommand, SlackResponse};
+use diesel::PgConnection;
 
-pub fn help(command: &SlackCommand) -> SlackResponse {
+pub fn help(command: &SlackCommand, db: &PgConnection) -> SlackResponse {
   let help_message = "\
   Here is how you use the scrabbler:
 

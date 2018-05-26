@@ -4,6 +4,7 @@
  */
 use rocket::request::LenientForm;
 use rocket_contrib::Json;
+use super::guards::db_guard::DbConn;
 
 // These are the modules for the different commands that can be used
 mod help;
@@ -42,24 +43,24 @@ pub struct SlackResponse {
 
 
 #[post("/", format="application/x-www-form-urlencoded", data="<data>")]
-pub fn post(data: LenientForm<SlackCommand>) -> Json<SlackResponse> {
+pub fn post(data: LenientForm<SlackCommand>, db: DbConn) -> Json<SlackResponse> {
   let command = data.get();
 
   let arguments: Vec<&str> = command.text.split(" ").collect();
 
   if arguments.len() == 0 {
-    return Json(help::help(command));
+    return Json(help::help(command, &*db));
   }
 
   // Argument type referes the the first arg eg: /scrabbler <play>
   let argument_type = arguments[0];
 
   let response = match argument_type {
-    "help" => help::help(command),
-    "play" => play::play(command),
-    "quit" => quit::quit(command),
-    "start" => start::start(command),
-    _ => help::help(command),
+    "help" => help::help(command, &*db),
+    "play" => play::play(command, &*db),
+    "quit" => quit::quit(command, &*db),
+    "start" => start::start(command, &*db),
+    _ => help::help(command, &*db),
   };
 
   return Json(response)

@@ -28,3 +28,5 @@ dotenv = "0.9.0"
 dotenv_codegen = "*"
 
 rand = "*"
+
+regex = "*"

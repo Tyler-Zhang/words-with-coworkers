@@ -8,6 +8,7 @@ table! {
         pieces -> Varchar,
         channel_id -> Varchar,
         player_turn_id -> Nullable<Int4>,
+        team_id -> Varchar,
     }
 }
 
@@ -18,10 +19,21 @@ table! {
         pieces -> Varchar,
         slack_id -> Varchar,
         points -> Int4,
+        team_id -> Varchar,
+    }
+}
+
+table! {
+    teams (id) {
+        id -> Varchar,
+        team_domain -> Varchar,
+        access_token -> Varchar,
+        bot_user_access_token -> Varchar,
     }
 }
 
 allow_tables_to_appear_in_same_query!(
     games,
     players,
+    teams,
 );

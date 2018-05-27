@@ -11,6 +11,7 @@ mod help;
 mod play;
 mod quit;
 mod start;
+mod hand;
 
 #[derive(FromForm, Debug)]
 pub struct SlackCommand {
@@ -41,10 +42,21 @@ pub struct SlackResponse {
   text: String,
 }
 
+impl SlackResponse {
+  fn new(text: String, in_channel: bool) -> SlackResponse {
+    SlackResponse {
+      text: text,
+      response_type: if in_channel { Some("in_channel".to_owned()) } else { None }
+    }
+  }
+}
+
 
 #[post("/", format="application/x-www-form-urlencoded", data="<data>")]
 pub fn post(data: LenientForm<SlackCommand>, db: DbConn) -> Json<SlackResponse> {
   let command = data.get();
+
+  println!("{:#?}", command);
 
   let arguments: Vec<&str> = command.text.split(" ").collect();
 
@@ -60,6 +72,7 @@ pub fn post(data: LenientForm<SlackCommand>, db: DbConn) -> Json<SlackResponse> 
     "play" => play::play(command, &*db),
     "quit" => quit::quit(command, &*db),
     "start" => start::start(command, &*db),
+    "hand" => hand::hand(command, &*db),
     _ => help::help(command, &*db),
   };
 

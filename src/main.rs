@@ -1,6 +1,7 @@
 #![feature(plugin, try_from, custom_derive)]
 #![plugin(rocket_codegen)]
 
+#[macro_use]
 extern crate auto_impl;
 extern crate rocket;
 extern crate rocket_contrib;
@@ -25,8 +26,12 @@ extern crate dotenv_codegen;
 
 extern crate rand;
 
+extern crate regex;
+
 pub mod models;
 pub mod schema;
+pub mod services;
+pub mod helpers;
 pub mod operations;
 mod app;
 

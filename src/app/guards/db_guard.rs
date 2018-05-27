@@ -2,7 +2,7 @@ use std::ops::Deref;
 use rocket::http::Status;
 use rocket::request::{self, FromRequest};
 use rocket::{Request, State, Outcome};
-use diesel::r2d2::{ConnectionManager, Pool, PooledConnection};
+use diesel::r2d2::{ConnectionManager, PooledConnection};
 use diesel::PgConnection;
 use super::super::pool::PgPool;
 

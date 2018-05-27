@@ -1,6 +1,6 @@
 use ::schema::games;
 
-#[derive(Queryable)]
+#[derive(Queryable, Identifiable, AsChangeset, Clone)]
 pub struct Game {
     pub id: i32,
     pub board: String,
@@ -9,7 +9,8 @@ pub struct Game {
     pub turn_count: i32,
     pub pieces: String,
     pub channel_id: String,
-    pub player_turn_id: Option<i32>
+    pub player_turn_id: Option<i32>,
+    pub team_id: String
 }
 
 #[derive(Insertable)]
@@ -21,5 +22,6 @@ pub struct NewGame<'a> {
     pub turn_count: i32,
     pub pieces: &'a str,
     pub channel_id: &'a str,
-    pub player_turn_id: Option<i32>
+    pub player_turn_id: Option<i32>,
+    pub team_id: &'a str
 }

@@ -4,7 +4,7 @@ use diesel::prelude::*;
 use rand::{thread_rng, Rng};
 use ::models::{Game, NewGame};
 
-pub fn create_game<'a>(conn: &PgConnection, channel_id: &'a str) -> Game {
+pub fn create_game(conn: &PgConnection, channel_id: &str, team_id: &str) -> Game {
     use ::schema::*;
 
     let default_board = generate_default_board();
@@ -17,7 +17,8 @@ pub fn create_game<'a>(conn: &PgConnection, channel_id: &'a str) -> Game {
         turn_count: 0,
         pieces: &default_pieces,
         channel_id: channel_id,
-        player_turn_id: None
+        player_turn_id: None,
+        team_id: team_id
     };
 
     diesel::insert_into(games::table)

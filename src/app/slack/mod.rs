@@ -12,6 +12,7 @@ mod play;
 mod quit;
 mod start;
 mod hand;
+mod board;
 
 #[derive(FromForm, Debug)]
 pub struct SlackCommand {
@@ -73,6 +74,7 @@ pub fn post(data: LenientForm<SlackCommand>, db: DbConn) -> Json<SlackResponse> 
     "quit" => quit::quit(command, &*db),
     "start" => start::start(command, &*db),
     "hand" => hand::hand(command, &*db),
+    "board" => board::board(command, &*db),
     _ => help::help(command, &*db),
   };
 

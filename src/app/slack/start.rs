@@ -8,12 +8,12 @@ pub fn start(command: &SlackCommand, db: &PgConnection) -> SlackResponse {
     // Check to see if there is already a game
     let existing_game = game_services::get_by_channel_id(db, &command.channel_id);
 
-    // if existing_game.is_some() {
-    //     return SlackResponse::new(
-    //         format!("This channel is already playing a game! id: {}", existing_game.unwrap().id), 
-    //         false
-    //     );
-    // }
+    if existing_game.is_some() {
+        return SlackResponse::new(
+            format!("This channel is already playing a game! id: {}", existing_game.unwrap().id), 
+            false
+        );
+    }
 
     // Get all user's id's
     let mut ids = ::helpers::extract_user_ids(&command.text);
@@ -40,16 +40,16 @@ pub fn start(command: &SlackCommand, db: &PgConnection) -> SlackResponse {
     game.player_turn_id = Some(players[0].id);
 
     // Hand out inital game pieces
-    game_operations::give_initial_pieces(&mut game, &mut players);
+    game_operations::gameplay::give_initial_pieces(&mut game, &mut players);
     game_services::update(db, &game);
-    players.into_iter().for_each(|player| { player_services::update(db, &player); });
+    players.iter().for_each(|player| { player_services::update(db, &player); });
 
     let text = format!("\
     \nLets start a new game!\
     \n{}\
     \nUse `/scrabbler hand` to see what pieces you have!
     \nUse `/scrabbler play <word> <row:col> <right | down>` to play a word!
-    ", game_operations::game_board_to_str(&game, true));
+    ", game_operations::printing::format_game_state((&game, &players), true));
 
     SlackResponse::new(text, true)
 }

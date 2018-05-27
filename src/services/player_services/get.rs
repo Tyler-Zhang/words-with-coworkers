@@ -1,4 +1,3 @@
-use diesel;
 use diesel::PgConnection;
 use diesel::prelude::*;
 use ::models::{Player, NewPlayer, Game};

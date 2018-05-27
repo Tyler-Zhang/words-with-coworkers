@@ -20,7 +20,7 @@ pub fn hand(command: &SlackCommand, db: &PgConnection) -> SlackResponse {
     }
 
     SlackResponse::new(
-        format!("Your letters are: {}", game_operations::translate_letters_to_emoji(&player.unwrap().pieces)), 
+        format!("Your letters are: {}", game_operations::printing::translate_letters_to_emoji(&player.unwrap().pieces)), 
         false
     )
 }

@@ -1,15 +1,21 @@
 use super::{SlackCommand, SlackResponse};
+use ::services::{game_services, player_services};
 use diesel::PgConnection;
 
 pub fn quit(command: &SlackCommand, db: &PgConnection) -> SlackResponse {
-  let help_message = "\
-  Here is how you use the scrabbler:
+    let game = game_services::get_by_channel_id(db, &command.channel_id);
 
-/scrabbler help - Brings up this help dialogue
-/scrabbler start - Start a game with the person you're chatting to
-/scrabbler quit - Quit the current game
-  ";
+    if game.is_none() {
+        return SlackResponse::new(String::from("There isn't a game in this channel"), false);
+    }
 
+    let mut game = game.unwrap();
 
-  SlackResponse { text: help_message.to_string(), response_type: Some("ephemeral".to_string()) }
+    game.player_turn_id = None;
+    game_services::update(db, &game);
+
+    player_services::delete_by_game(db, game.id);
+    game_services::delete(db, game);
+
+    SlackResponse::new(format!("<@{}> has ended the game", command.user_id) , true)
 }

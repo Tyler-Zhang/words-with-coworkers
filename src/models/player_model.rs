@@ -2,6 +2,7 @@ use ::schema::players;
 use super::Game;
 
 #[derive(Queryable, Identifiable, AsChangeset, Associations, PartialEq, Clone)]
+#[table_name="players"]
 #[belongs_to(Game)]
 pub struct Player {
     pub id: i32,

@@ -1,0 +1,27 @@
+use std::collections::HashSet;
+use std::io::prelude::*;
+use std::io::{BufReader, BufRead};
+use std::fs::File;
+
+pub struct ScrabbleDictionary {
+    words: HashSet<String>
+}
+
+impl ScrabbleDictionary {
+    pub fn new(path: &str) -> ScrabbleDictionary {
+        let mut words = HashSet::new();
+
+        let f = File::open(path).expect("File not found");
+        let file = BufReader::new(&f);
+        
+        for (num, line) in file.lines().enumerate() {
+            words.insert(line.unwrap());
+        }
+
+        return ScrabbleDictionary { words: words }
+    }
+
+    pub fn is_word_valid(&self, word: &str) -> bool {
+        self.words.contains(word)
+    }
+}

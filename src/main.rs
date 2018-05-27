@@ -23,6 +23,8 @@ extern crate r2d2_diesel;
 #[macro_use]
 extern crate dotenv_codegen;
 
+extern crate rand;
+
 pub mod models;
 pub mod schema;
 pub mod operations;

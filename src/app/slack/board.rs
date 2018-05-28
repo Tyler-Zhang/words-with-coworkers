@@ -4,11 +4,11 @@ use ::services::{game_services, player_services};
 use ::operations::{game_operations};
 use ::models::Player;
 
-pub fn board(command: &SlackCommand, db: &PgConnection) -> SlackResponse {
+pub fn board(command: &SlackCommand, db: &PgConnection) -> Result<SlackResponse, String> {
     let game = game_services::get_by_channel_id(db, &command.channel_id);
 
     if game.is_none() {
-        return SlackResponse::new("There is currently no game in this channel".to_string(), false);
+        return Ok(SlackResponse::new("There is currently no game in this channel".to_string(), false));
     }
 
     let game = game.unwrap();
@@ -19,5 +19,5 @@ pub fn board(command: &SlackCommand, db: &PgConnection) -> SlackResponse {
     \n{}\
     ", game_operations::printing::format_game_state((&game, &players), true));
 
-    SlackResponse::new(text, false)
+    Ok(SlackResponse::new(text, false))
 }

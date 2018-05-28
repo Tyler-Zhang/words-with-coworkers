@@ -9,6 +9,7 @@ pub struct ScrabbleDictionary {
 
 impl ScrabbleDictionary {
     pub fn new(path: &str) -> ScrabbleDictionary {
+        println!("Building hashset");
         let mut words = HashSet::new();
 
         let f = File::open(path).expect("File not found");

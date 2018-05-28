@@ -26,3 +26,39 @@ pub struct NewGame<'a> {
     pub player_turn_id: Option<i32>,
     pub team_id: &'a str
 }
+
+impl Game {
+    pub fn board_to_vec (&self) -> Vec<Vec<char>> {
+    let mut main_vec = Vec::new();
+
+    for i in 0..(self.board_height as usize) {
+        main_vec.push(
+            self.board[(i * self.board_width as usize)..(i + 1) * self.board_width as usize]
+                .to_owned()
+                .into_bytes()
+                .into_iter()
+                .map(|c| c as char)
+                .collect()
+        )
+    }
+
+    main_vec
+    }
+
+    pub fn set_board_from_vec (&mut self, vec: Vec<Vec<char>>) {
+        assert_eq!(vec.len(), self.board_height as usize);
+        assert_eq!(vec[0].len(), self.board_height as usize);
+        
+        let mut new_board = String::new();
+
+        println!("{:#?}", vec);
+
+        for row in vec {
+            for c in row {
+                new_board.push(c);
+            }
+        }
+
+        self.board = new_board;
+    }
+}

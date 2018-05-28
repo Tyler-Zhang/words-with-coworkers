@@ -4,15 +4,17 @@
  */
 use rocket::request::LenientForm;
 use rocket_contrib::Json;
+use rocket::State;
+use super::state::dictionary::ScrabbleDictionary;
 use super::guards::db_guard::DbConn;
 
 // These are the modules for the different commands that can be used
-mod help;
-mod play;
-mod quit;
-mod start;
-mod hand;
-mod board;
+pub mod help;
+pub mod play;
+pub mod quit;
+pub mod start;
+pub mod hand;
+pub mod board;
 
 #[derive(FromForm, Debug)]
 pub struct SlackCommand {
@@ -54,7 +56,7 @@ impl SlackResponse {
 
 
 #[post("/", format="application/x-www-form-urlencoded", data="<data>")]
-pub fn post(data: LenientForm<SlackCommand>, db: DbConn) -> Json<SlackResponse> {
+pub fn post(data: LenientForm<SlackCommand>, db: DbConn, dict: State<ScrabbleDictionary>) -> Json<SlackResponse> {
   let command = data.get();
 
   println!("{:#?}", command);
@@ -62,7 +64,7 @@ pub fn post(data: LenientForm<SlackCommand>, db: DbConn) -> Json<SlackResponse> 
   let arguments: Vec<&str> = command.text.split(" ").collect();
 
   if arguments.len() == 0 {
-    return Json(help::help(command, &*db));
+    return Json(help::help(command, &*db).unwrap());
   }
 
   // Argument type referes the the first arg eg: /scrabbler <play>
@@ -70,7 +72,7 @@ pub fn post(data: LenientForm<SlackCommand>, db: DbConn) -> Json<SlackResponse> 
 
   let response = match argument_type {
     "help" => help::help(command, &*db),
-    "play" => play::play(command, &*db),
+    "play" => play::play(command, &*db, &*dict),
     "quit" => quit::quit(command, &*db),
     "start" => start::start(command, &*db),
     "hand" => hand::hand(command, &*db),
@@ -78,5 +80,8 @@ pub fn post(data: LenientForm<SlackCommand>, db: DbConn) -> Json<SlackResponse> 
     _ => help::help(command, &*db),
   };
 
-  return Json(response)
+  match response {
+    Ok(r) => Json(r),
+    Err(message) => Json(SlackResponse::new(format!("error: {}", message), false))
+  }
 }

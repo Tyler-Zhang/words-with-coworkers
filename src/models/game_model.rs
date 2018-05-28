@@ -51,8 +51,6 @@ impl Game {
         
         let mut new_board = String::new();
 
-        println!("{:#?}", vec);
-
         for row in vec {
             for c in row {
                 new_board.push(c);

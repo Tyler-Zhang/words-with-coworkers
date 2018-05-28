@@ -37,10 +37,10 @@ pub fn start(command: &SlackCommand, db: &PgConnection) -> Result<SlackResponse,
         .collect();
     
     // Set the initial player
-    game.player_turn_id = Some(players[0].id);
+    game.player_turn_id = Some(players[1].id);
 
     // Hand out inital game pieces
-    game_operations::setup::give_initial_pieces(&mut game, &mut players);
+    game_operations::pieces::give_initial_pieces(&mut game, &mut players);
     game_services::update(db, &game);
     players.iter().for_each(|player| { player_services::update(db, &player); });
 

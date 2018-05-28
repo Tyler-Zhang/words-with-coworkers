@@ -34,7 +34,7 @@ pub fn play(command: &SlackCommand, db: &PgConnection, dict: &ScrabbleDictionary
 
     println!("{:#?}", play_move);
 
-    game_operations::gameplay::execute_move(&mut player, &mut game, &play_move, dict)?;
+    game_operations::placement::execute_move(&mut player, &mut game, &play_move, dict)?;
 
     game_services::update(db, &game);
     player_services::update(db, &player);

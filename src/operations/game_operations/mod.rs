@@ -1,3 +1,3 @@
-pub mod gameplay;
+pub mod placement;
 pub mod printing;
-pub mod setup;
+pub mod pieces;

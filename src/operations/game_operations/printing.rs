@@ -35,7 +35,15 @@ fn game_board_to_str<'a>(game: &'a Game, use_emoji: bool) -> String {
     let mut printout = String::new();
 
     if use_emoji {
+        let mut header_numbers = String::from(":white_square:");
+        for i in 0..game.board_width {
+            header_numbers.push_str(&translate_number_to_emoji(i));
+        }
+
+        printout.push_str(&(header_numbers + &"\n"));
+
         for row in 0..board.len() / width  {
+            printout.push_str(&translate_number_to_emoji(row as i32));
             for c in board[row*width..row*width + width].to_owned().into_bytes() {
                 printout += &emoji_translator(c as char);
             }
@@ -51,6 +59,27 @@ fn game_board_to_str<'a>(game: &'a Game, use_emoji: bool) -> String {
     }
 
     printout
+}
+
+pub fn translate_number_to_emoji (num: i32) -> String {
+    format!(":{}:", number_to_word(num % 11))
+}
+
+pub fn number_to_word (num: i32) -> String {
+    match num {
+        0 => format!("zero"),
+        1 => format!("one"),
+        2 => format!("two"),
+        3 => format!("three"),
+        4 => format!("four"),
+        5 => format!("five"),
+        6 => format!("six"),
+        7 => format!("seven"),
+        8 => format!("eight"),
+        9 => format!("nine"),
+        10 => format!("keycap_ten"),
+        _ => panic!(format!("{} too high", num))
+    }
 }
 
 pub fn translate_letters_to_emoji (text: &str) -> String {

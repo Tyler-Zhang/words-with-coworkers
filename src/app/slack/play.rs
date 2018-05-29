@@ -24,20 +24,30 @@ pub fn play(command: &SlackCommand, db: &PgConnection, dict: &ScrabbleDictionary
     let mut game = game.unwrap();
     let player = player_services::get_player_from_game(db, &game, &command.user_id);
 
-    if (player.is_none()) {
+    if player.is_none() {
         return Err(String::from("You are not participating in the game"));
     }
 
     let mut player = player.unwrap();
 
-    let play_move = text_to_play_word_param(&command.text)?;
+    if player.id != game.player_turn_id.unwrap() {
+        return Err(String::from("It is not currently your turn"));
+    }
 
+
+    let play_move = text_to_play_word_param(&command.text)?;
     let events = game_operations::placement::execute_move(&mut player, &mut game, &play_move, dict)?;
 
-    game_services::update(db, &game);
     player_services::update(db, &player);
-
     let players = player_services::get_players_from_game(db, &game);
+
+    game.turn_count += 1;
+
+    let next_turn_player_id = players[(game.turn_count % players.len() as i32) as usize].id;
+    game.player_turn_id = Some(next_turn_player_id);
+
+    game_services::update(db, &game);
+
     let response_text = format!("\
     {} did the following:\
     \n{}\

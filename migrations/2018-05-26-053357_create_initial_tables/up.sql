@@ -38,12 +38,12 @@ ALTER TABLE games
   FOREIGN KEY (player_turn_id)
   REFERENCES players (id);
 
-ALTER TABLE games
-  ADD CONSTRAINT fk_team
-  FOREIGN KEY (team_id)
-  REFERENCES teams (id);
+-- ALTER TABLE games
+--   ADD CONSTRAINT fk_team
+--   FOREIGN KEY (team_id)
+--   REFERENCES teams (id);
 
-ALTER TABLE players
-  ADD CONSTRAINT fk_team
-  FOREIGN KEY (team_id)
-  REFERENCES teams (id);
+-- ALTER TABLE players
+--   ADD CONSTRAINT fk_team
+--   FOREIGN KEY (team_id)
+--   REFERENCES teams (id);

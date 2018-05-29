@@ -1,4 +1,3 @@
-use std:: collections::HashMap;
 use ::models::{Player, Game};
 use ::app::slack::play::PlayWordParams;
 use app::state::dictionary::ScrabbleDictionary;
@@ -37,14 +36,61 @@ pub fn execute_move(player: &mut Player, game: &mut Game, play: &PlayWordParams,
         return play_starting_spot(player, game, play, dict, starting_spot.unwrap());
     }
 
-    Err(String::from("Not implemented yet"))
-
+    return play_regular(player, game, play, dict);
 }
 
-fn play_starting_spot (player: &mut Player, game: &mut Game, play: &PlayWordParams, dict: &ScrabbleDictionary, starting: (usize, usize)) -> Result<String, String> {
-    if !dict.is_word_valid(&play.word) {
-        return Err(String::from("This is not a valid word"));
+fn play_regular(player: &mut Player, game: &mut Game, play: &PlayWordParams, dict: &ScrabbleDictionary) -> Result<String, String> {
+    check_valid_word(&play.word, dict)?;
+    
+    let mut board = game.board_to_vec();
+
+    check_placeable(&board, play, &player.pieces)?;
+
+    let mut points = get_points_from_place(&board, &play.word, (play.col, play.row), play.horizontal);
+
+    // Go along the word, and use extend word to calculate all perpendicular word values
+    let mut x = play.col;
+    let mut y = play.row;
+
+    let xDelta = if play.horizontal { 1 } else { 0 };
+    let yDelta = if play.horizontal { 0 } else { 1 };
+
+    let mut did_find_perpendicular = false;
+
+    for i in 0..play.word.len() {
+        let (extended_word, starts_at) = extend_word_both_dir(&board, (x, y), !play.horizontal, play.word[i..].chars().next().unwrap());
+
+        // Dont check if it's just one letter
+        if extended_word.len() > 1 {
+            check_valid_word(&extended_word, dict)?;
+            points += get_points_from_place(&board, &extended_word, starts_at, !play.horizontal);
+            did_find_perpendicular = true;
+        }
+
+        x += xDelta;
+        y += yDelta;
     }
+
+    // Everything was successful, give the player their points
+    player.points += points;
+
+    let used_pieces = place_onto_board(&mut board, play);
+
+    if used_pieces.len() == play.word.len() && !did_find_perpendicular {
+        return Err(format!("Your play must intersect with another word"));
+    }
+
+
+    super::pieces::remove_pieces(&mut *player, &used_pieces)?;
+    super::pieces::give_pieces(&mut *player, &mut *game);
+    game.set_board_from_vec(board);
+
+    Ok(format!("Player gained {} points", points))
+}
+
+
+fn play_starting_spot (player: &mut Player, game: &mut Game, play: &PlayWordParams, dict: &ScrabbleDictionary, starting: (usize, usize)) -> Result<String, String> {
+    check_valid_word(&play.word, dict)?;
 
     let starting_col = starting.0 as i32;
     let starting_row = starting.1 as i32;

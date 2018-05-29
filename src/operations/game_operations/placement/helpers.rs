@@ -1,3 +1,42 @@
+use super::checkers::is_char_letter;
+
+pub fn extend_word_both_dir(board: &Vec<Vec<char>>, start: (i32, i32), horizontal: bool, c: char) -> (String, (i32, i32)) {
+    let (xDelta, yDelta) = if horizontal { (1, 0) } else { (0, 1) };
+
+    let backwards = extend_word(board, start, (xDelta * -1, yDelta * -1));
+    let forwards = extend_word(board, start, (xDelta, yDelta));
+
+    let mut full_word = backwards.0.chars().rev().collect::<String>();
+    full_word.push(c);
+    full_word.push_str(&forwards.0);
+
+    (full_word, backwards.1)
+}
+
+/**
+ * Returns the word that the extended and where the word starts
+ */
+pub fn extend_word(board: &Vec<Vec<char>>, start: (i32, i32), direction: (i32, i32)) -> (String, (i32, i32)) {
+    let (mut x, mut y) = start;
+
+    let mut word = String::new();
+
+    loop {
+        x += direction.0;
+        y += direction.1;
+
+        let next_letter = get_char_from_vec(board, x, y);
+
+        if next_letter.is_none() || !is_char_letter(next_letter.unwrap()) {
+            break;
+        }
+
+        word.push(next_letter.unwrap());
+    }
+
+    (word, (x, y))
+}
+
 pub fn get_multiplier (c: char) -> (i32, i32) {
     match c {
         '2' => (2, 1),

@@ -1,3 +1,4 @@
+use app::state::dictionary::ScrabbleDictionary;
 use std:: collections::HashMap;
 use ::models::{Player, Game};
 use ::app::slack::play::PlayWordParams;
@@ -75,6 +76,14 @@ pub fn check_no_extending_characters(board: &Vec<Vec<char>>, play: &PlayWordPara
            (down.is_some() && is_char_letter(down.unwrap())) {
                return Err(String::from("There are extending characters, please specify the whole"));
         }    
+    }
+
+    Ok(())
+}
+
+pub fn check_valid_word(word: &str, dict: &ScrabbleDictionary) -> Result<(), String> {
+    if !dict.is_word_valid(word) {
+        return Err(format!("{} is not a valid word", word));
     }
 
     Ok(())

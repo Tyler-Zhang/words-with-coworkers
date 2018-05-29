@@ -96,7 +96,12 @@ fn emoji_translator(symbol: char) -> String {
         return format!(":scrabble-{}:", char::from_u32((symbol as u32) + 32).unwrap());
     } else {
         match symbol {
-            '.' => String::from(":white_square:"),
+            '.' => String::from(":scrabble_board:"),
+            '2' => String::from(":scrabble_double_letter:"),
+            '3' => String::from(":scrabble_triple_letter:"),
+            '@' => String::from(":scrabble_double_word:"),
+            '#' => String::from(":scrabble_triple_word:"),
+            '+' => String::from(":scrabble_start:"),
             _ => format!("{}", symbol)
         }
     }

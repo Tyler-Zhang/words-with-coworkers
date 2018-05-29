@@ -30,9 +30,9 @@ pub fn play(command: &SlackCommand, db: &PgConnection, dict: &ScrabbleDictionary
 
     let mut player = player.unwrap();
 
-    if player.id != game.player_turn_id.unwrap() {
-        return Err(String::from("It is not currently your turn"));
-    }
+    // if player.id != game.player_turn_id.unwrap() {
+    //     return Err(String::from("It is not currently your turn"));
+    // }
 
 
     let play_move = text_to_play_word_param(&command.text)?;
@@ -58,14 +58,14 @@ pub fn play(command: &SlackCommand, db: &PgConnection, dict: &ScrabbleDictionary
 }
 
 pub fn text_to_play_word_param(text: &str) -> Result<PlayWordParams, String> {
-    let re = Regex::new(r"play (?P<word>\w+) (?P<col>\d+):(?P<row>\d+) (?P<dir>\w+)").unwrap();
+    let re = Regex::new(r"play (?P<word>\w+) (?P<col>\d+):(?P<row>\d+) (?P<dir>down|right)").unwrap();
 
     let caps = re
         .captures(text)
         .ok_or("Your command is malformatted".to_string())?;
 
     Ok(PlayWordParams {
-        word: caps.name("word").unwrap().to_owned(),
+        word: caps.name("word").unwrap().to_owned().to_uppercase(),
         row: caps.name("row").unwrap().parse::<i32>().unwrap(),
         col: caps.name("col").unwrap().parse::<i32>().unwrap(),
         horizontal: caps.name("dir").unwrap() == "right",

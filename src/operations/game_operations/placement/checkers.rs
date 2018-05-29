@@ -1,6 +1,6 @@
 use app::state::dictionary::ScrabbleDictionary;
 use std:: collections::HashMap;
-use ::models::{Player, Game};
+use ::models::{Game};
 use ::app::slack::play::PlayWordParams;
 use super::helpers::*;
 
@@ -60,7 +60,7 @@ pub fn check_parameter_valid(game: &Game, play: &PlayWordParams) -> Result<(), S
 pub fn check_no_extending_characters(board: &Vec<Vec<char>>, play: &PlayWordParams) -> Result<(), String> {
     if play.horizontal {
         let left = get_char_from_vec(board, play.col - 1, play.row);
-        let right = get_char_from_vec(board, play.col + 1, play.row);
+        let right = get_char_from_vec(board, play.col + play.word.len() as i32 + 1, play.row);
 
         if (left.is_some() && is_char_letter(left.unwrap())) ||
            (right.is_some() && is_char_letter(right.unwrap())) {
@@ -68,9 +68,7 @@ pub fn check_no_extending_characters(board: &Vec<Vec<char>>, play: &PlayWordPara
         }    
     } else {
         let up = get_char_from_vec(board, play.col, play.row - 1);
-        let down = get_char_from_vec(board, play.col, play.row + 1);
-
-        println!("up: {}, down: {}", up.unwrap(), down.unwrap());
+        let down = get_char_from_vec(board, play.col, play.row + play.word.len() as i32 + 1);
 
         if (up.is_some() && is_char_letter(up.unwrap())) ||
            (down.is_some() && is_char_letter(down.unwrap())) {

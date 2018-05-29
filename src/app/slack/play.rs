@@ -32,21 +32,23 @@ pub fn play(command: &SlackCommand, db: &PgConnection, dict: &ScrabbleDictionary
 
     let play_move = text_to_play_word_param(&command.text)?;
 
-    println!("{:#?}", play_move);
-
-    game_operations::placement::execute_move(&mut player, &mut game, &play_move, dict)?;
+    let events = game_operations::placement::execute_move(&mut player, &mut game, &play_move, dict)?;
 
     game_services::update(db, &game);
     player_services::update(db, &player);
 
-    Ok(SlackResponse {
-        text: "hello".to_string(),
-        response_type: Some("ephemeral".to_string()),
-    })
+    let players = player_services::get_players_from_game(db, &game);
+    let response_text = format!("\
+    {} did the following:\
+    \n{}\
+    \n{}
+    ", format!("<@{}>", player.slack_id), events, game_operations::printing::format_game_state((&game, &players), true));
+
+    Ok(SlackResponse::new(response_text, true))
 }
 
 pub fn text_to_play_word_param(text: &str) -> Result<PlayWordParams, String> {
-    let re = Regex::new(r"play (?P<word>\w+) (?P<row>\d+):(?P<col>\d+) (?P<dir>\w+)").unwrap();
+    let re = Regex::new(r"play (?P<word>\w+) (?P<col>\d+):(?P<row>\d+) (?P<dir>\w+)").unwrap();
 
     let caps = re
         .captures(text)

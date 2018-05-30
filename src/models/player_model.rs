@@ -1,7 +1,7 @@
 use ::schema::players;
 use super::Game;
 
-#[derive(Queryable, Identifiable, AsChangeset, Associations, PartialEq, Clone)]
+#[derive(Queryable, Identifiable, AsChangeset, Associations, PartialEq, Clone, Debug)]
 #[table_name="players"]
 #[belongs_to(Game)]
 pub struct Player {

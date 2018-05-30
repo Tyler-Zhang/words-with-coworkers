@@ -29,10 +29,9 @@ pub fn play(command: &SlackCommand, db: &PgConnection, dict: &ScrabbleDictionary
 
     let mut player = player.unwrap();
 
-    // if player.id != game.player_turn_id.unwrap() {
-    //     return Err(String::from("It is not currently your turn"));
-    // }
-
+    if player.id != game.player_turn_id.unwrap() {
+        return Err(String::from("It is not currently your turn"));
+    }
 
     let play_move = text_to_play_word_param(&command.text)?;
     let events = game_operations::placement::execute_move(&mut player, &mut game, &play_move, dict)?;
@@ -42,7 +41,9 @@ pub fn play(command: &SlackCommand, db: &PgConnection, dict: &ScrabbleDictionary
 
     game.turn_count += 1;
 
-    let next_turn_player_id = players[(game.turn_count % players.len() as i32) as usize].id;
+    let new_player_idx = (game.turn_count % players.len() as i32) as usize;
+
+    let next_turn_player_id = players[new_player_idx].id;
     game.player_turn_id = Some(next_turn_player_id);
 
     game_services::update(db, &game);

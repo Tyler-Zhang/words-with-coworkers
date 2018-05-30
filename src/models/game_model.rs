@@ -1,7 +1,7 @@
 use ::schema::games;
 
 #[changeset_options(treat_none_as_null = "true")]
-#[derive(Queryable, Identifiable, AsChangeset, Clone)]
+#[derive(Queryable, Identifiable, AsChangeset, Clone, Debug)]
 pub struct Game {
     pub id: i32,
     pub board: String,

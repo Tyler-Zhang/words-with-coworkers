@@ -62,7 +62,7 @@ fn game_board_to_str<'a>(game: &'a Game, use_emoji: bool) -> String {
 }
 
 pub fn translate_number_to_emoji (num: i32) -> String {
-    format!(":{}:", number_to_word(num % 11))
+    format!(":{}:", number_to_word(num % 10))
 }
 
 pub fn number_to_word (num: i32) -> String {
@@ -77,7 +77,6 @@ pub fn number_to_word (num: i32) -> String {
         7 => format!("seven"),
         8 => format!("eight"),
         9 => format!("nine"),
-        10 => format!("keycap_ten"),
         _ => panic!(format!("{} too high", num))
     }
 }

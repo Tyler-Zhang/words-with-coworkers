@@ -54,8 +54,8 @@ pub fn get_char_score (c: char) -> i32 {
         'B' | 'C' | 'M' | 'P' => 3,
         'F' | 'H' | 'V' | 'W' | 'Y' => 4,
         'K' => 5,
-        'J' | 'X' => 1,
-        'Q' | 'Z' => 1,
+        'J' | 'X' => 8,
+        'Q' | 'Z' => 10,
         _ => panic!(format!("Trying to get string for invalid char {}", c))
     }
 }
@@ -73,13 +73,13 @@ pub fn get_starting_spot(board: &Vec<Vec<char>>) -> Option<(usize, usize)> {
 
 
 pub fn get_char_from_vec(vec: &Vec<Vec<char>>, x: i32, y: i32) -> Option<char> {
-    if y < 0 || y as usize>= vec.len() {
+    if y < 0 || y as usize >= vec.len() {
         return None;
     }
 
     let row = &vec[y as usize];
 
-    if x < 0 || x as usize > row.len() {
+    if x < 0 || x as usize >= row.len() {
         return None;
     } else {
         return Some(row[x as usize]);

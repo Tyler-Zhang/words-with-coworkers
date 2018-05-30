@@ -18,7 +18,7 @@ pub fn start(command: &SlackCommand, db: &PgConnection) -> Result<SlackResponse,
     // Get all user's id's
     let mut ids = ::helpers::extract_user_ids(&command.text);
     
-    if ids.len() != 1 {
+    if ids.len() == 0 {
         return Ok(SlackResponse::new (
             format!("You must tag the player you're trying to play with"),
             false
@@ -26,7 +26,7 @@ pub fn start(command: &SlackCommand, db: &PgConnection) -> Result<SlackResponse,
     }
 
     // Push sender id onto the vec
-    ids.push(&command.user_id);
+    ids.insert(0usize, &command.user_id);
     
     // Create the game
     let mut game = game_services::create_game(db, &command.channel_id, &command.team_id);
@@ -37,7 +37,7 @@ pub fn start(command: &SlackCommand, db: &PgConnection) -> Result<SlackResponse,
         .collect();
     
     // Set the initial player
-    game.player_turn_id = Some(players[1].id);
+    game.player_turn_id = Some(players[0].id);
 
     // Hand out inital game pieces
     game_operations::pieces::give_initial_pieces(&mut game, &mut players);

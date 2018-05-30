@@ -15,6 +15,7 @@ pub mod quit;
 pub mod start;
 pub mod hand;
 pub mod board;
+pub mod dict;
 
 #[derive(FromForm, Debug)]
 pub struct SlackCommand {
@@ -77,6 +78,7 @@ pub fn post(data: LenientForm<SlackCommand>, db: DbConn, dict: State<ScrabbleDic
     "start" => start::start(command, &*db),
     "hand" => hand::hand(command, &*db),
     "board" => board::board(command, &*db),
+    "dict" => dict::dict(command, &*db, &*dict),
     _ => help::help(command, &*db),
   };
 

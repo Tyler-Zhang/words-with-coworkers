@@ -43,8 +43,8 @@ pub fn check_placeable (board: &Vec<Vec<char>>, play: &PlayWordParams, pieces: &
 pub fn check_parameter_valid(game: &Game, play: &PlayWordParams) -> Result<(), String> {
     if play.col < 0 || play.col >= game.board_width ||
         play.row < 0 || play.row >= game.board_height ||
-        (play.horizontal && play.col + play.word.len() as i32 >= game.board_width) ||
-        (!play.horizontal && play.row + play.word.len() as i32 >= game.board_height)
+        (play.horizontal && play.col + play.word.len() as i32 > game.board_width) ||
+        (!play.horizontal && play.row + play.word.len() as i32 > game.board_height)
     {
         return Err(String::from("Row or Col is out of range"));
     }
@@ -61,7 +61,7 @@ pub fn check_parameter_valid(game: &Game, play: &PlayWordParams) -> Result<(), S
 pub fn check_no_extending_characters(board: &Vec<Vec<char>>, play: &PlayWordParams) -> Result<(), String> {
     if play.horizontal {
         let left = get_char_from_vec(board, play.col - 1, play.row);
-        let right = get_char_from_vec(board, play.col + play.word.len() as i32 + 1, play.row);
+        let right = get_char_from_vec(board, play.col + play.word.len() as i32, play.row);
 
         if (left.is_some() && is_char_letter(left.unwrap())) ||
            (right.is_some() && is_char_letter(right.unwrap())) {
@@ -69,7 +69,7 @@ pub fn check_no_extending_characters(board: &Vec<Vec<char>>, play: &PlayWordPara
         }    
     } else {
         let up = get_char_from_vec(board, play.col, play.row - 1);
-        let down = get_char_from_vec(board, play.col, play.row + play.word.len() as i32 + 1);
+        let down = get_char_from_vec(board, play.col, play.row + play.word.len() as i32);
 
         if (up.is_some() && is_char_letter(up.unwrap())) ||
            (down.is_some() && is_char_letter(down.unwrap())) {

@@ -1,4 +1,4 @@
-use std::{char, cmp};
+use std::{cmp};
 use std::collections::HashMap;
 use ::models::{Game, Player};
 
@@ -29,7 +29,7 @@ pub fn remove_pieces(player: &mut Player, pieces: &str) -> Result<(), String>{
         return true;
     }).collect::<String>();
 
-    for (key, val) in pieces_to_remove.iter() {
+    for (_key, val) in pieces_to_remove.iter() {
         if *val > 0 {
             return Err(String::from("Dont have enough pieces to remove"));
         }

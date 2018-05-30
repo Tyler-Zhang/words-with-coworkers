@@ -1,10 +1,10 @@
 use super::checkers::is_char_letter;
 
 pub fn extend_word_both_dir(board: &Vec<Vec<char>>, start: (i32, i32), horizontal: bool, c: char) -> (String, (i32, i32)) {
-    let (xDelta, yDelta) = if horizontal { (1, 0) } else { (0, 1) };
+    let (delta_x, delta_y) = if horizontal { (1, 0) } else { (0, 1) };
 
-    let backwards = extend_word(board, start, (xDelta * -1, yDelta * -1));
-    let forwards = extend_word(board, start, (xDelta, yDelta));
+    let backwards = extend_word(board, start, (delta_x * -1, delta_y * -1));
+    let forwards = extend_word(board, start, (delta_x, delta_y));
 
     let mut full_word = backwards.0.chars().rev().collect::<String>();
     full_word.push(c);
@@ -63,7 +63,7 @@ pub fn get_char_score (c: char) -> i32 {
 pub fn get_starting_spot(board: &Vec<Vec<char>>) -> Option<(usize, usize)> {
     for (r, row) in board.iter().enumerate() {
         for (c, col) in row.iter().enumerate() {
-            if (*col == '+') {
+            if *col == '+' {
                 return Some((r, c));
             }
         }

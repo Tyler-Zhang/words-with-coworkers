@@ -1,5 +1,4 @@
 use std::collections::HashSet;
-use std::io::prelude::*;
 use std::io::{BufReader, BufRead};
 use std::fs::File;
 
@@ -15,7 +14,7 @@ impl ScrabbleDictionary {
         let f = File::open(path).expect("File not found");
         let file = BufReader::new(&f);
         
-        for (num, line) in file.lines().enumerate() {
+        for (_num, line) in file.lines().enumerate() {
             words.insert(line.unwrap());
         }
 

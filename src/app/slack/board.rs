@@ -2,7 +2,6 @@ use diesel::PgConnection;
 use super::{SlackCommand, SlackResponse};
 use ::services::{game_services, player_services};
 use ::operations::{game_operations};
-use ::models::Player;
 
 pub fn board(command: &SlackCommand, db: &PgConnection) -> Result<SlackResponse, String> {
     let game = game_services::get_by_channel_id(db, &command.channel_id);

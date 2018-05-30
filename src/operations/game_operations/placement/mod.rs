@@ -52,8 +52,8 @@ fn play_regular(player: &mut Player, game: &mut Game, play: &PlayWordParams, dic
     let mut x = play.col;
     let mut y = play.row;
 
-    let xDelta = if play.horizontal { 1 } else { 0 };
-    let yDelta = if play.horizontal { 0 } else { 1 };
+    let delta_x = if play.horizontal { 1 } else { 0 };
+    let delta_y = if play.horizontal { 0 } else { 1 };
 
     let mut did_find_perpendicular = false;
 
@@ -67,8 +67,8 @@ fn play_regular(player: &mut Player, game: &mut Game, play: &PlayWordParams, dic
             did_find_perpendicular = true;
         }
 
-        x += xDelta;
-        y += yDelta;
+        x += delta_x;
+        y += delta_y;
     }
 
     // Everything was successful, give the player their points
@@ -98,11 +98,11 @@ fn play_starting_spot (player: &mut Player, game: &mut Game, play: &PlayWordPara
 
     // Check to make sure the play will include the starting position
     if play.horizontal {
-        if (play.row != starting_row || play.col > starting_col || play.col + (play.word.len() as i32) < starting_col) {
+        if play.row != starting_row || play.col > starting_col || play.col + (play.word.len() as i32) < starting_col {
             return Err(String::from("The staring point must be included in your play"));
         }
     } else {
-        if (play.col != starting_col || play.row > starting_row || play.row + (play.word.len() as i32) < starting_row) {
+        if play.col != starting_col || play.row > starting_row || play.row + (play.word.len() as i32) < starting_row {
             return Err(String::from("The staring point must be included in your play"));
         }
     }

@@ -31,7 +31,7 @@ pub fn check_placeable (board: &Vec<Vec<char>>, play: &PlayWordParams, pieces: &
     }
 
 
-    for (key, value) in needed_letters.iter() {
+    for (_key, value) in needed_letters.iter() {
         if *value > 0 {
             return Err(String::from("You do not have enough pieces to do this"));
         }
@@ -41,15 +41,16 @@ pub fn check_placeable (board: &Vec<Vec<char>>, play: &PlayWordParams, pieces: &
 }
 
 pub fn check_parameter_valid(game: &Game, play: &PlayWordParams) -> Result<(), String> {
-    if (
-        play.col < 0 || play.col >= game.board_width ||
-        play.row < 0 || play.row >= game.board_height
-    ) {
+    if play.col < 0 || play.col >= game.board_width ||
+        play.row < 0 || play.row >= game.board_height ||
+        (play.horizontal && play.col + play.word.len() as i32 >= game.board_width) ||
+        (!play.horizontal && play.row + play.word.len() as i32 >= game.board_height)
+    {
         return Err(String::from("Row or Col is out of range"));
     }
 
     for c in play.word.chars() {
-        if (c < 'A' || c > 'Z') {
+        if !is_char_letter(c) {
             return Err(String::from("The word can only contain letters A-Z"));
         }
     }

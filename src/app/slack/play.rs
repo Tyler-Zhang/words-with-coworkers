@@ -3,7 +3,6 @@ use diesel::PgConnection;
 use regex::Regex;
 use services::{game_services, player_services};
 use operations::game_operations;
-use std;
 use super::super::state::dictionary::ScrabbleDictionary;
 
 #[derive(Debug)]

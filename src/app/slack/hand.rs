@@ -2,7 +2,6 @@ use diesel::PgConnection;
 use super::{SlackCommand, SlackResponse};
 use ::services::{game_services, player_services};
 use ::operations::{game_operations};
-use ::models::Player;
 
 pub fn hand(command: &SlackCommand, db: &PgConnection) -> Result<SlackResponse, String> {
     let game = game_services::get_by_channel_id(db, &command.channel_id);
@@ -15,7 +14,7 @@ pub fn hand(command: &SlackCommand, db: &PgConnection) -> Result<SlackResponse, 
     
     let player = player_services::get_player_from_game(db, &game, &command.user_id);
 
-    if (player.is_none()) {
+    if player.is_none() {
         return Ok(SlackResponse::new("You are not participating in the game".to_string(), false));
     }
 

@@ -58,6 +58,12 @@ fn play_regular(player: &mut Player, game: &mut Game, play: &PlayWordParams, dic
     let mut did_find_perpendicular = false;
 
     for i in 0..play.word.len() {
+        if is_char_letter(get_char_from_vec(&board, x, y).unwrap()) {
+            x += delta_x;
+            y += delta_y;
+            continue;
+        }
+
         let (extended_word, starts_at) = extend_word_both_dir(&board, (x, y), !play.horizontal, play.word[i..].chars().next().unwrap());
 
         // Dont check if it's just one letter
@@ -80,6 +86,9 @@ fn play_regular(player: &mut Player, game: &mut Game, play: &PlayWordParams, dic
         return Err(format!("Your play must intersect with another word"));
     }
 
+    if used_pieces.len() == 0 {
+        return Err(format!("You must play atleast one letter!"));
+    }
 
     super::pieces::remove_pieces(&mut *player, &used_pieces)?;
     super::pieces::give_pieces(&mut *player, &mut *game);

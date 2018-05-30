@@ -97,10 +97,10 @@ fn emoji_translator(symbol: char) -> String {
     } else {
         match symbol {
             '.' => String::from(":scrabble_board:"),
-            '2' => String::from(":scrabble_double_letter:"),
-            '3' => String::from(":scrabble_triple_letter:"),
-            '@' => String::from(":scrabble_double_word:"),
-            '#' => String::from(":scrabble_triple_word:"),
+            '2' => String::from(":scrabble_double_word:"),
+            '3' => String::from(":scrabble_triple_word:"),
+            '@' => String::from(":scrabble_double_letter:"),
+            '#' => String::from(":scrabble_triple_letter:"),
             '+' => String::from(":scrabble_start:"),
             _ => format!("{}", symbol)
         }

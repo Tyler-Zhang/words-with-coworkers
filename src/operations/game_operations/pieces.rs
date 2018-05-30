@@ -44,5 +44,11 @@ pub fn give_pieces(player: &mut Player, game: &mut Game) {
     let needed_pieces_count = NORMAL_PIECES_COUNT - player.pieces.len();
 
     let game_pieces_len = game.pieces.len();
-    player.pieces += &game.pieces.split_off(cmp::max(game_pieces_len - needed_pieces_count, 0));
+
+    let mut split_point = 0;
+
+    if game_pieces_len > needed_pieces_count {
+        split_point = game_pieces_len - needed_pieces_count;
+    }
+    player.pieces += &game.pieces.split_off(split_point);
 }

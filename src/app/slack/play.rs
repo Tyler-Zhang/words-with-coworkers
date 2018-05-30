@@ -49,10 +49,10 @@ pub fn play(command: &SlackCommand, db: &PgConnection, dict: &ScrabbleDictionary
     game_services::update(db, &game);
 
     let response_text = format!("\
-    {} did the following:\
-    \n{}\
+    {}\
+    \n>>>\n<@{}> did the following:\
     \n{}
-    ", format!("<@{}>", player.slack_id), events, game_operations::printing::format_game_state((&game, &players), true));
+    ", game_operations::printing::format_game_state((&game, &players), true), player.slack_id, events );
 
     Ok(SlackResponse::new(response_text, true))
 }

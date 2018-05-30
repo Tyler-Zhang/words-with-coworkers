@@ -47,8 +47,8 @@ pub fn start(command: &SlackCommand, db: &PgConnection) -> Result<SlackResponse,
     let text = format!("\
     \nLets start a new game!\
     \n{}\
-    \nUse `/scrabbler hand` to see what pieces you have!
-    \nUse `/scrabbler play <word> <col:row> <right | down>` to play a word!
+    \n>Use `/scrabbler hand` to see what pieces you have!
+    \n>Use `/scrabbler play <word> <x:y> <right|down>` to play a word!
     ", game_operations::printing::format_game_state((&game, &players), true));
 
     Ok(SlackResponse::new(text, true))

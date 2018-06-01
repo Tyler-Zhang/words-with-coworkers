@@ -4,7 +4,7 @@ pub fn extract_user_ids (text: &str) -> Vec<&str>{
     // Matches text like <@UAX2B1P71|tztylerzhang>
     let re = Regex::new(r"<@(?P<id>\w+)\|\S+>").unwrap();
 
-    re.captures_iter(text).map(|c| c.name("id").unwrap()).collect()
+    re.captures_iter(text).map(|c| c.name("id").unwrap().as_str()).collect()
 }
 
 #[cfg(test)]

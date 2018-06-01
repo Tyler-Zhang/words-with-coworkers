@@ -65,9 +65,9 @@ pub fn text_to_play_word_param(text: &str) -> Result<PlayWordParams, String> {
         .ok_or("Your command is malformatted".to_string())?;
 
     Ok(PlayWordParams {
-        word: caps.name("word").unwrap().to_owned().to_uppercase(),
-        row: caps.name("row").unwrap().parse::<i32>().unwrap(),
-        col: caps.name("col").unwrap().parse::<i32>().unwrap(),
-        horizontal: caps.name("dir").unwrap() == "right",
+        word: caps.name("word").unwrap().as_str().to_owned().to_uppercase(),
+        row: caps.name("row").unwrap().as_str().parse::<i32>().unwrap(),
+        col: caps.name("col").unwrap().as_str().parse::<i32>().unwrap(),
+        horizontal: caps.name("dir").unwrap().as_str() == "right",
     })
 }

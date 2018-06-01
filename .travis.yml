@@ -2,3 +2,5 @@ language: rust
 rust:
   - nightly-2018-05-13
 cache: cargo
+env:
+  DICTIONARY_PATH: ./dictionary.txt

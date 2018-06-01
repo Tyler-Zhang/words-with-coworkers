@@ -1,6 +1,8 @@
 #![feature(plugin, try_from, custom_derive)]
 #![plugin(rocket_codegen)]
 
+extern crate dotenv;
+
 #[macro_use]
 extern crate auto_impl;
 extern crate rocket;
@@ -21,12 +23,11 @@ extern crate diesel;
 extern crate r2d2;
 extern crate r2d2_diesel;
 
-#[macro_use]
-extern crate dotenv_codegen;
-
 extern crate rand;
 
 extern crate regex;
+
+use dotenv::dotenv;
 
 pub mod models;
 pub mod schema;
@@ -36,5 +37,6 @@ pub mod operations;
 mod app;
 
 fn main() {
+    dotenv().ok();
     app::start();
 }

@@ -25,7 +25,6 @@ r2d2 = "*"
 r2d2-diesel = "1.0.0"
 
 dotenv = "0.9.0"
-dotenv_codegen = "*"
 
 rand = "*"
 

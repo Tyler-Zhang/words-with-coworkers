@@ -1,1 +1,1 @@
-web: ./target/release/hello
+web: ./target/release/slack-scrabble-bot

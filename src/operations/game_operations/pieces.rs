@@ -49,6 +49,8 @@ pub fn give_pieces(player: &mut Player, game: &mut Game) {
 
     if game_pieces_len > needed_pieces_count {
         split_point = game_pieces_len - needed_pieces_count;
+    } else {
+        split_point = game_pieces_len;
     }
     player.pieces += &game.pieces.split_off(split_point);
 }

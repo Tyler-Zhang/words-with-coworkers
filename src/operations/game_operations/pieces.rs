@@ -2,7 +2,7 @@ use std::{cmp};
 use std::collections::HashMap;
 use ::models::{Game, Player};
 
-static NORMAL_PIECES_COUNT: usize = 10;
+static NORMAL_PIECES_COUNT: usize = 7;
 
 pub fn give_initial_pieces(game: &mut Game, players: &mut Vec<Player>) {
     for player in players {

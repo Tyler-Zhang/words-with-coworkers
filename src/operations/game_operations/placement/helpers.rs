@@ -22,15 +22,14 @@ pub fn extend_word(board: &Vec<Vec<char>>, start: (i32, i32), direction: (i32, i
     let mut word = String::new();
 
     loop {
-        x += direction.0;
-        y += direction.1;
-
-        let next_letter = get_char_from_vec(board, x, y);
+        let next_letter = get_char_from_vec(board, x + direction.0, y + direction.1);
 
         if next_letter.is_none() || !is_char_letter(next_letter.unwrap()) {
             break;
         }
 
+        x += direction.0;
+        y += direction.1;
         word.push(next_letter.unwrap());
     }
 

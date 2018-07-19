@@ -35,13 +35,14 @@ pub fn extend_word(board: &Vec<Vec<char>>, start: (i32, i32), direction: (i32, i
 
     (word, (x, y))
 }
-
+// Returns multipler as (word_multiplier, letter_multiplier)
 pub fn get_multiplier (c: char) -> (i32, i32) {
     match c {
         '2' => (2, 1),
         '3' => (3, 1),
         '@' => (1, 2),
         '#' => (1, 3),
+        '+' => (2, 1),
         _ => (1, 1)
     }
 }

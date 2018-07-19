@@ -157,7 +157,7 @@ fn get_points_from_place(board: &Vec<Vec<char>>, overlay: &str, starting: (i32, 
             word_multiplier *= word_mult;
 
             letter_score += get_char_score(overlay[(i as usize)..].chars().next().unwrap()) * letter_mult;
-            characters_used++;
+            characters_used += 1;
         }
         if horizontal { col += 1 } else { row += 1 }
     }

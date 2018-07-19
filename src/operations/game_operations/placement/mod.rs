@@ -142,7 +142,8 @@ fn play_starting_spot (player: &mut Player, game: &mut Game, play: &PlayWordPara
 fn get_points_from_place(board: &Vec<Vec<char>>, overlay: &str, starting: (i32, i32), horizontal: bool) -> i32 {
     let mut word_multiplier = 1;
     let mut letter_score = 0;
-
+    let mut characters_used = 0;
+    
     let (mut col, mut row) = starting;
     let len = overlay.len();
 
@@ -156,11 +157,18 @@ fn get_points_from_place(board: &Vec<Vec<char>>, overlay: &str, starting: (i32, 
             word_multiplier *= word_mult;
 
             letter_score += get_char_score(overlay[(i as usize)..].chars().next().unwrap()) * letter_mult;
+            characters_used++;
         }
         if horizontal { col += 1 } else { row += 1 }
     }
+    
+    let mut offset = 0;
+    
+    if characters_used == 7 {
+        offset = 50;
+    }
 
-    return letter_score * word_multiplier;
+    return letter_score * word_multiplier + offset;
 }
 
 fn place_onto_board(board: &mut Vec<Vec<char>>, play: &PlayWordParams) -> String {

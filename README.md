@@ -4,7 +4,9 @@
 
 Feeling too productive at work recently? Play a nice game of scrabble on the company slack!
 
-## Screen shots
+## How it looks
+
+![](https://i.imgur.com/fGuHP6A.png)
 
 ## How to Install
 

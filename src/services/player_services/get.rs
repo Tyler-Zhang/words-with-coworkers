@@ -4,7 +4,7 @@ use ::models::{Player, Game};
 
 pub fn get_players_from_game(conn: &PgConnection, game: &Game) -> Vec<Player> {
     use ::schema::players::dsl::*;
-    
+
     Player::belonging_to(game).order(id).get_results(conn).expect("Could not load players")
 }
 

@@ -14,13 +14,8 @@ pub struct PlayWordParams {
 }
 
 pub fn play(command: &SlackCommand, db: &PgConnection, dict: &ScrabbleDictionary) -> Result<SlackResponse, String> {
-    let game = game_services::get_by_channel_id(db, &command.channel_id);
+    let mut game = game_services::get_by_channel_id(db, &command.channel_id)?;
 
-    if game.is_none() {
-        return Err(String::from("There is no game in this channel"));
-    }
-
-    let mut game = game.unwrap();
     let player = player_services::get_player_from_game(db, &game, &command.user_id);
 
     if player.is_none() {

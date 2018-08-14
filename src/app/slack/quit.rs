@@ -3,13 +3,7 @@ use ::services::{game_services, player_services};
 use diesel::PgConnection;
 
 pub fn quit(command: &SlackCommand, db: &PgConnection) -> Result<SlackResponse, String> {
-    let game = game_services::get_by_channel_id(db, &command.channel_id);
-
-    if game.is_none() {
-        return Ok(SlackResponse::new(String::from("There isn't a game in this channel"), false));
-    }
-
-    let mut game = game.unwrap();
+    let mut game = game_services::get_by_channel_id(db, &command.channel_id)?;
 
     game.player_turn_id = None;
     game_services::update(db, &game);

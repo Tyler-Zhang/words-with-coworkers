@@ -12,7 +12,7 @@ pub fn board(command: &SlackCommand, db: &PgConnection) -> Result<SlackResponse,
 
     let game = game.unwrap();
     let players = player_services::get_players_from_game(db, &game);
-    
+
     let text = format!("{}", game_operations::printing::format_game_state((&game, &players), true));
 
     Ok(SlackResponse::new(text, false))

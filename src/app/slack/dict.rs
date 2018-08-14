@@ -1,9 +1,8 @@
 use super::{SlackCommand, SlackResponse};
-use diesel::PgConnection;
 use regex::Regex;
 use super::super::state::dictionary::ScrabbleDictionary;
 
-pub fn dict(command: &SlackCommand, _db: &PgConnection, dict: &ScrabbleDictionary) -> Result<SlackResponse, String> {
+pub fn dict(command: &SlackCommand, dict: &ScrabbleDictionary) -> Result<SlackResponse, String> {
     let word = extract_text(&command.text)?;
 
     if dict.is_word_valid(&word) {

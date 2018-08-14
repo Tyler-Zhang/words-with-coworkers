@@ -27,7 +27,7 @@ pub struct SlackCommand {
   pub channel_id: String,
   pub channel_name: String,
   pub user_id: String,
-  
+
   // This field is being fazed out and thus not guaranteed
   pub user_name: Option<String>,
 
@@ -65,21 +65,22 @@ pub fn post(data: LenientForm<SlackCommand>, db: DbConn, dict: State<ScrabbleDic
   let arguments: Vec<&str> = command.text.split(" ").collect();
 
   if arguments.len() == 0 {
-    return Json(help::help(command, &*db).unwrap());
+    return Json(help::help().unwrap());
   }
 
-  // Argument type referes the the first arg eg: /scrabbler <play>
-  let argument_type = arguments[0];
+  // refers to the sub command. Eg: for /scrabbler play, the sub command
+  // would be play
+  let sub_command = arguments[0];
 
-  let response = match argument_type {
-    "help" => help::help(command, &*db),
+  let response = match sub_command {
+    "help" => help::help(),
     "play" => play::play(command, &*db, &*dict),
     "quit" => quit::quit(command, &*db),
     "start" => start::start(command, &*db),
     "hand" => hand::hand(command, &*db),
     "board" => board::board(command, &*db),
-    "dict" => dict::dict(command, &*db, &*dict),
-    _ => help::help(command, &*db),
+    "dict" => dict::dict(command, &*dict),
+    _ => help::help(),
   };
 
   match response {

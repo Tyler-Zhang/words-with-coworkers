@@ -1,6 +1,5 @@
-use super::{SlackCommand, SlackResponse};
+use super::SlackResponse;
 use operations::game_operations::printing::translate_letters_to_emoji;
-use diesel::PgConnection;
 
 pub fn help() -> Result<SlackResponse, String> {
   let help_message = format!("\

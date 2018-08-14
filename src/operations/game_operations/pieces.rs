@@ -1,4 +1,3 @@
-use std::{cmp};
 use std::collections::HashMap;
 use ::models::{Game, Player};
 

@@ -60,8 +60,6 @@ impl SlackResponse {
 pub fn post(data: LenientForm<SlackCommand>, db: DbConn, dict: State<ScrabbleDictionary>) -> Json<SlackResponse> {
   let command = data.get();
 
-  println!("{:#?}", command);
-
   let arguments: Vec<&str> = command.text.split(" ").collect();
 
   if arguments.len() == 0 {

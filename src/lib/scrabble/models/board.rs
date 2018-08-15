@@ -59,12 +59,6 @@ mod tests {
         assert_eq!(board.tiles[0], Tile::Empty);
         assert_eq!(board.tiles[1], Tile::DoubleWord);
         assert_eq!(board.tiles[2], Tile::TripleWord);
-        assert_eq!(board.tiles[3], Tile::DoubleLetter);
-        assert_eq!(board.tiles[4], Tile::TripleLetter);
-        assert_eq!(board.tiles[5], Tile::Starting);
-        assert_eq!(board.tiles[6], Tile::Letter('A'));
-        assert_eq!(board.tiles[7], Tile::Letter('B'));
-        assert_eq!(board.tiles[8], Tile::Letter('C'));
     }
 
     #[test]

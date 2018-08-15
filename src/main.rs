@@ -34,6 +34,7 @@ pub mod schema;
 pub mod services;
 pub mod helpers;
 pub mod operations;
+pub mod lib;
 mod app;
 
 fn main() {

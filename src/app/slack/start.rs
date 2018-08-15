@@ -9,20 +9,14 @@ pub fn start(command: &SlackCommand, db: &PgConnection) -> Result<SlackResponse,
     let existing_game = game_services::get_by_channel_id(db, &command.channel_id);
 
     if existing_game.is_ok() {
-        return Ok(SlackResponse::new(
-            format!("This channel is already playing a game! id: {}", existing_game.unwrap().id),
-            false
-        ));
+        return Err(format!("This channel is already playing a game! id: {}", existing_game.unwrap().id))
     }
 
     // Get all user's id's
     let mut ids = ::helpers::extract_user_ids(&command.text);
 
     if ids.len() == 0 {
-        return Ok(SlackResponse::new (
-            format!("You must tag the player you're trying to play with"),
-            false
-        ));
+        return Err(format!("You must tag the player you're trying to play with"))
     }
 
     // Push sender id onto the vec

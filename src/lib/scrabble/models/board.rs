@@ -34,6 +34,22 @@ impl Board {
 
         Ok(&self.tiles[(y * self.width + x) as usize])
     }
+
+    fn get_starting_spot(&self) -> Option<(u32, u32)> {
+        let mut index: u32 = 0;
+        for tile in self.tiles.iter() {
+            if *tile == Tile::Starting {
+                break;
+            }
+            index += 1;
+        }
+
+        if index < self.tiles.len() as u32 {
+            return Some((index % self.width, index / self.width));
+        }
+
+        None
+    }
 }
 
 #[cfg(test)]
@@ -91,5 +107,16 @@ mod tests {
         assert_eq!(board.at(1, 2).unwrap(), &Tile::Letter('B'));
 
         assert_eq!(board.at(3, 0).is_err(), true);
+    }
+
+    #[test]
+    fn get_starting_spot() {
+        let board_string = ".23@#+ABC";
+        let board = Board::from(board_string);
+        assert_eq!(board.get_starting_spot(), Some((2, 1)));
+
+        let board_string = ".23@#.ABC";
+        let board = Board::from(board_string);
+        assert_eq!(board.get_starting_spot(), None);
     }
 }

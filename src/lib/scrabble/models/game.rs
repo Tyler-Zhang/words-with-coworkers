@@ -11,7 +11,7 @@ pub struct Game {
 }
 
 impl Game {
-    fn generate_new_game(player_count: u32) -> Self {
+    fn new_game(player_count: u32) -> Self {
         let pieces = generate_default_pieces();
 
         let players = [0..player_count].iter()

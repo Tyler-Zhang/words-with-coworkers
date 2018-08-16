@@ -3,7 +3,7 @@ pub struct Player {
 }
 
 impl Player {
-    fn new(pieces: String) -> Self {
+    pub fn new(pieces: String) -> Self {
         Player{ pieces }
     }
 }

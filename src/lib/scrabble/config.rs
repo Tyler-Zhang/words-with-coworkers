@@ -1,0 +1,1 @@
+pub static PLAYER_HAND_PIECES_COUNT: u32 = 7;

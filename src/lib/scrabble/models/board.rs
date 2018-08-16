@@ -23,6 +23,36 @@ impl Into<String> for Board {
 }
 
 impl Board {
+    pub fn new_default_board() -> Self {
+        /*
+            This generates the default game board using the following symbols:
+            . - Empty piece
+            3 - Triple word
+            2 - Double word
+            @ - Double letter
+            # - Tripple letter
+            + - Starting spot
+        */
+        return Board::from(
+            "\
+            3..@...3...@..3\
+            .2...#...#...2.\
+            ..2...@.@...2..\
+            @..2...@...2..@\
+            ....2.....2....\
+            .#...#...#...#.\
+            ..@...@.@...@..\
+            3..@...+...@..3\
+            ..@...@.@...@..\
+            .#...#...#...#.\
+            ....2.....2....\
+            @..2...@...2..@\
+            ..2...@.@...2..\
+            .2...#...#...2.\
+            3..@...3...@..3"
+        )
+    }
+
     fn in_bounds(&self, x: u32, y: u32) -> bool {
         x < self.width && y < self.height
     }
@@ -118,5 +148,13 @@ mod tests {
         let board_string = ".23@#.ABC";
         let board = Board::from(board_string);
         assert_eq!(board.get_starting_spot(), None);
+    }
+
+    #[test]
+    fn new_default_board() {
+        let board = Board::new_default_board();
+
+        assert_eq!(board.width, 15);
+        assert_eq!(board.height, 15);
     }
 }

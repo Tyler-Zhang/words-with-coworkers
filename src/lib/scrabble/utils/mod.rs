@@ -1,1 +1,1 @@
-pub mod string_to_hashmap;
+pub mod string;

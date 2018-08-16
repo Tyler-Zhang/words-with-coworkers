@@ -12,10 +12,10 @@ pub struct Game {
 
 impl Game {
     fn new_game(player_count: u32) -> Self {
-        let pieces = generate_default_pieces();
+        let mut pieces = generate_default_pieces();
 
         let players = [0..player_count].iter()
-            .map(|_| Player::new(pieces.split_off(pieces.len() - config::PLAYER_HAND_PIECES_COUNT as usize)))
+            .map(|_| Player::new(pieces.split_off(config::PLAYER_HAND_PIECES_COUNT as usize)))
             .collect();
 
         Game {

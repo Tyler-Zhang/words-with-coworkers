@@ -12,6 +12,8 @@ pub fn create_game(conn: &PgConnection, channel_id: &str, team_id: &str) -> Game
 
     let new_game = NewGame {
         board: &default_board,
+        board_width: 15,
+        board_height: 15,
         turn_count: 0,
         pieces: &default_pieces,
         channel_id: channel_id,
@@ -55,7 +57,7 @@ fn generate_default_board() -> String {
 
 /*
     This generates the inital "bag" of pieces that have not been picked
-
+    
     We currently dont support the blank tile
 */
 fn generate_default_pieces() -> String {
@@ -78,7 +80,7 @@ fn generate_default_pieces() -> String {
         "C".repeat(2),
         "M".repeat(2),
         "P".repeat(2),
-
+        
         "F".repeat(2),
         "H".repeat(2),
         "V".repeat(2),

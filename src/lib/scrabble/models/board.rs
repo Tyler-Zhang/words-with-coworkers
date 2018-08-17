@@ -1,4 +1,4 @@
-use super::{Tile, Word, Direction};
+use super::{Tile, Word, Direction, Point};
 use super::super::config;
 
 pub struct Board {
@@ -28,16 +28,16 @@ impl Board {
         Board::from(config::DEFAULT_BOARD)
     }
 
-    pub fn check_in_bounds(&self, x: i32, y: i32) -> bool {
-        x < self.width && y < self.height && x >= 0 && y >= 0
+    pub fn check_in_bounds(&self, point: Point) -> bool {
+        point.x() < self.width && point.y() < self.height && point.x() >= 0 && point.y() >= 0
     }
 
-    pub fn at(&self, x: i32, y: i32) -> Result<&Tile, String> {
-        if !self.check_in_bounds(x, y) {
+    pub fn at(&self, point: Point) -> Result<&Tile, String> {
+        if !self.check_in_bounds(point) {
             return Err(format!("Coordinates out of bounds"));
         }
 
-        Ok(&self.tiles[(y * self.width + x) as usize])
+        Ok(&self.tiles[(point.y() * self.width + point.x()) as usize])
     }
 
     pub fn get_starting_spot(&self) -> Option<(i32, i32)> {
@@ -56,7 +56,7 @@ impl Board {
         None
     }
 
-    pub fn iterate<F>(&self, start: (i32, i32), direction: Direction, len: i32, mut f: F)
+    pub fn iterate_for<F>(&self, start: Point, direction: Direction, len: i32, mut f: F)
     where
         F: FnMut(&Tile) -> ()
     {
@@ -64,60 +64,45 @@ impl Board {
             return;
         }
 
-        let end_x = start.0 + direction.x() * (len - 1);
-        let end_y = start.1 + direction.y() * (len - 1);
+        assert_eq!(self.check_in_bounds(start + direction * (len - 1)), true);
 
-        assert_eq!(self.check_in_bounds(end_x, end_y), true);
-
-        let mut x = start.0;
-        let mut y = start.1;
+        let mut curr = start;
 
         for i in 0..len {
-            f(self.at(x, y).unwrap());
+            f(self.at(curr).unwrap());
 
-            x += direction.x();
-            y += direction.y();
+            curr += direction;
         }
     }
 
-    pub fn iterate_until<F>(&self, start: (i32, i32), direction: Direction, mut f: F)
+    pub fn iterate_while<F>(&self, start: Point, direction: Direction, mut f: F)
     where
         F: FnMut(&Tile) -> bool
     {
-        let mut x = start.0;
-        let mut y = start.1;
+        let mut curr = start;
 
         loop {
-            if !self.check_in_bounds(x, y) || !f(self.at(x, y).unwrap()){
+            if !self.check_in_bounds(curr) || !f(self.at(curr).unwrap()){
                 return;
             }
-
-            x += direction.x();
-            y += direction.y();
+            curr += direction;
         }
-    }
-
-    pub fn extend_word(&self, action: &mut Word) {
-        let mut extension_backwards: i32 = 0;
-        let mut extension_forwards: i32 = 0;
-
-
     }
 }
 
 
 #[cfg(test)]
 mod tests {
-    use super::{Tile, Board, Direction};
+    use super::*;
 
     #[test]
-    fn test_iterate_until() {
+    fn test_iterate_while() {
         let board = get_board();
         let expected_tiles = vec!(Tile::Empty, Tile::TripleLetter, Tile::Letter('C'));
 
         let mut idx = 0;
 
-        board.iterate_until((0, 0), Direction::new(1, 1), |tile: &Tile| -> bool {
+        board.iterate_while(Point::new(0, 0), Direction::new(1, 1), |tile: &Tile| -> bool {
             if idx == 2 {
                 return false;
             }
@@ -132,13 +117,13 @@ mod tests {
 
 
     #[test]
-    fn test_iterate() {
+    fn test_iterate_for() {
         let board = get_board();
         let expected_tiles = vec!(Tile::Empty, Tile::TripleLetter, Tile::Letter('C'));
 
         let mut idx = 0;
 
-        board.iterate((0, 0), Direction::new(1, 1), 3, |tile: &Tile| {
+        board.iterate_for(Point::new(0, 0), Direction::new(1, 1), 3, |tile: &Tile| {
             assert_eq!(tile, &expected_tiles[idx]);
             idx += 1;
         });
@@ -177,22 +162,22 @@ mod tests {
     fn check_in_bounds() {
         let board = get_board();
 
-        assert_eq!(board.check_in_bounds(0, 0), true);
-        assert_eq!(board.check_in_bounds(2, 2), true);
-        assert_eq!(board.check_in_bounds(3, 3), false);
+        assert_eq!(board.check_in_bounds(Point::new(0, 0)), true);
+        assert_eq!(board.check_in_bounds(Point::new(2, 2)), true);
+        assert_eq!(board.check_in_bounds(Point::new(3, 3)), false);
     }
 
     #[test]
     fn test_at() {
         let board = get_board();
 
-        assert_eq!(board.at(0, 0).is_ok(), true);
-        assert_eq!(board.at(0, 0).unwrap(), &Tile::Empty);
+        assert_eq!(board.at(Point::new(0, 0)).is_ok(), true);
+        assert_eq!(board.at(Point::new(0, 0)).unwrap(), &Tile::Empty);
 
-        assert_eq!(board.at(1, 2).is_ok(), true);
-        assert_eq!(board.at(1, 2).unwrap(), &Tile::Letter('B'));
+        assert_eq!(board.at(Point::new(1, 2)).is_ok(), true);
+        assert_eq!(board.at(Point::new(1, 2)).unwrap(), &Tile::Letter('B'));
 
-        assert_eq!(board.at(3, 0).is_err(), true);
+        assert_eq!(board.at(Point::new(3, 0)).is_err(), true);
     }
 
     #[test]

@@ -1,3 +1,6 @@
+use std::ops::{Neg, Mul};
+
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct Direction(i32, i32);
 
 impl Direction {
@@ -15,16 +18,27 @@ impl Direction {
     pub fn y(&self) -> i32 {
         self.1
     }
-
-    #[inline]
-    pub fn opposite(&self) -> Self {
-        Direction(self.0 * -1, self.1 * -1)
-    }
 }
 
 impl From<(i32, i32)> for Direction {
     fn from(pair: (i32, i32)) -> Self {
         Direction(pair.0, pair.1)
+    }
+}
+
+impl Neg for Direction {
+    type Output = Direction;
+
+    fn neg(self) -> Self {
+        Self::new(self.0 * -1, self.1 * -1)
+    }
+}
+
+impl Mul<i32> for Direction {
+    type Output = Direction;
+
+    fn mul(self, rhs: i32) -> Self {
+        Self::new(self.0 * rhs, self.1 * rhs)
     }
 }
 
@@ -38,7 +52,7 @@ mod tests {
         assert_eq!(direction.x(), 5);
         assert_eq!(direction.y(), 10);
 
-        let opposite = direction.opposite();
+        let opposite = - direction;
 
         assert_eq!(opposite.x(), -5);
         assert_eq!(opposite.y(), -10);

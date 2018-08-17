@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 use super::super::config;
-use super::{Board, Player, Action};
+use super::{Board, Player, Word};
 
 pub struct Game {
     pub board: Board,
@@ -30,21 +30,21 @@ impl Game {
         self.turn_count % player_count
     }
 
-    pub fn verify_action(&self, action: &Action) -> Result<(), String> {
-        if action.start.0 > self.board.width || action.start.1 > self.board.height {
+    pub fn verify_action(&self, word: &Word) -> Result<(), String> {
+        if word.start.0 > self.board.width || word.start.1 > self.board.height {
             return Err(format!("Starting position out of range"));
         }
 
-        if action.direction_down && action.start.1 + (action.word.len() as i32) > self.board.height ||
-            !action.direction_down && action.start.0 + (action.word.len() as i32) > self.board.width {
+        if word.direction_down && word.start.1 + (word.letters.len() as i32) > self.board.height ||
+            !word.direction_down && word.start.0 + (word.letters.len() as i32) > self.board.width {
                 return Err(format!("End of word out of range"));
         }
 
         Ok(())
     }
 
-    fn play<'a>(&self, word: &'a str, start: (i32, i32), direction_down: bool, dict: &HashSet<String>) -> Result<Action<'a>, String> {
-        let mut action = Action::new(word, start, direction_down);
+    fn play<'a>(&self, word: &'a str, start: (i32, i32), direction_down: bool, dict: &HashSet<String>) -> Result<Word<'a>, String> {
+        let mut action = Word::new(word, start, direction_down);
         self.verify_action(&action)?;
 
         Ok(action)

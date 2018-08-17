@@ -1,4 +1,4 @@
-use super::{Tile, Action, Direction};
+use super::{Tile, Word, Direction};
 use super::super::config;
 
 pub struct Board {
@@ -97,7 +97,7 @@ impl Board {
         }
     }
 
-    pub fn extend_word(&self, action: &mut Action) {
+    pub fn extend_word(&self, action: &mut Word) {
         let mut extension_backwards: i32 = 0;
         let mut extension_forwards: i32 = 0;
 

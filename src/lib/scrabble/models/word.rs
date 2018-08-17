@@ -16,4 +16,22 @@ impl Word {
             direction_down
         }
     }
+
+    pub fn get_end(&self) -> Point {
+        self.start + (self.direction * (self.letters.len() as i32))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_get_end() {
+        let word = Word::new(format!("HELLO"), (1, 5), true);
+        let end = word.get_end();
+
+        assert_eq!(end.x(), 1);
+        assert_eq!(end.y(), 10);
+    }
 }

@@ -66,7 +66,7 @@ pub fn check_no_extending_characters(board: &Vec<Vec<char>>, play: &PlayWordPara
         if (left.is_some() && is_char_letter(left.unwrap())) ||
            (right.is_some() && is_char_letter(right.unwrap())) {
                return Err(String::from("There are extending characters, please specify the whole"));
-        }    
+        }
     } else {
         let up = get_char_from_vec(board, play.col, play.row - 1);
         let down = get_char_from_vec(board, play.col, play.row + play.word.len() as i32);
@@ -74,7 +74,7 @@ pub fn check_no_extending_characters(board: &Vec<Vec<char>>, play: &PlayWordPara
         if (up.is_some() && is_char_letter(up.unwrap())) ||
            (down.is_some() && is_char_letter(down.unwrap())) {
                return Err(String::from("There are extending characters, please specify the whole"));
-        }    
+        }
     }
 
     Ok(())

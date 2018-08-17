@@ -1,18 +1,17 @@
+use std::collections::HashSet;
 use super::super::config;
-use super::board::Board;
-use super::player::Player;
-use rand::{thread_rng, Rng};
+use super::{Board, Player, Action};
 
 pub struct Game {
-    board: Board,
-    players: Vec<Player>,
-    player_turn: u32,
-    pieces: String
+    pub board: Board,
+    pub players: Vec<Player>,
+    pub turn_count: u32,
+    pub pieces: String
 }
 
 impl Game {
-    fn new_game(player_count: u32) -> Self {
-        let mut pieces = generate_default_pieces();
+    pub fn new(player_count: u32) -> Self {
+        let mut pieces = config::generate_default_pieces();
 
         let players = [0..player_count].iter()
             .map(|_| Player::new(pieces.split_off(config::PLAYER_HAND_PIECES_COUNT as usize)))
@@ -21,54 +20,34 @@ impl Game {
         Game {
             board: Board::new_default_board(),
             players: players,
-            player_turn: 0,
+            turn_count: 0,
             pieces: pieces
         }
     }
+
+    pub fn get_player_turn_index(&self) -> u32 {
+        let player_count = self.players.len() as u32;
+        self.turn_count % player_count
+    }
+
+    pub fn verify_action(&self, action: &Action) -> Result<(), String> {
+        if action.start.0 > self.board.width || action.start.1 > self.board.height {
+            return Err(format!("Starting position out of range"));
+        }
+
+        if action.direction_down && action.start.1 + (action.word.len() as u32) > self.board.height ||
+            !action.direction_down && action.start.0 + (action.word.len() as u32) > self.board.width {
+                return Err(format!("End of word out of range"));
+        }
+
+        Ok(())
+    }
+
+    fn play<'a>(&self, word: &'a str, start: (u32, u32), direction_down: bool, dict: &HashSet<String>) -> Result<Action<'a>, String> {
+        let mut action = Action::new(word, start, direction_down);
+        self.verify_action(&action)?;
+
+        Ok(action)
+    }
 }
 
-/*as
-    This generates the inital "bag" of pieces that have not been picked
-    We currently dont support the blank tile
-*/
-fn generate_default_pieces() -> String {
-    let pieces = [
-        "E".repeat(12),
-        "A".repeat(9),
-        "I".repeat(9),
-        "O".repeat(8),
-        "N".repeat(6),
-        "R".repeat(6),
-        "T".repeat(6),
-        "L".repeat(4),
-        "S".repeat(4),
-        "U".repeat(4),
-
-        "D".repeat(4),
-        "G".repeat(3),
-
-        "B".repeat(2),
-        "C".repeat(2),
-        "M".repeat(2),
-        "P".repeat(2),
-
-        "F".repeat(2),
-        "H".repeat(2),
-        "V".repeat(2),
-        "W".repeat(2),
-        "Y".repeat(2),
-
-        "K".repeat(1),
-
-        "J".repeat(1),
-        "X".repeat(1),
-
-        "Q".repeat(1),
-        "Z".repeat(1)
-    ].join("");
-
-    let mut shuffled: Vec<u8> = pieces.into_bytes();
-    thread_rng().shuffle(&mut shuffled);
-
-    String::from_utf8(shuffled).expect("Shuffle pieces")
-}

@@ -1,12 +1,13 @@
 use super::super::utils::string;
 
 pub struct Player {
-    pieces: String
+    pub pieces: String,
+    pub score: u32
 }
 
 impl Player {
     pub fn new(pieces: String) -> Self {
-        Player{ pieces }
+        Player{ pieces, score: 0 }
     }
 
     pub fn remove_pieces(&mut self, pieces: &str) -> Result<(), String> {

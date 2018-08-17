@@ -1,9 +1,10 @@
-use super::tile::Tile;
+use super::{Tile, Action};
+use super::super::config;
 
 pub struct Board {
-    width: u32,
-    height: u32,
-    tiles: Vec<Tile>
+    pub width: u32,
+    pub height: u32,
+    pub tiles: Vec<Tile>
 }
 
 impl<'a> From<&'a str> for Board {
@@ -24,48 +25,22 @@ impl Into<String> for Board {
 
 impl Board {
     pub fn new_default_board() -> Self {
-        /*
-            This generates the default game board using the following symbols:
-            . - Empty piece
-            3 - Triple word
-            2 - Double word
-            @ - Double letter
-            # - Tripple letter
-            + - Starting spot
-        */
-        return Board::from(
-            "\
-            3..@...3...@..3\
-            .2...#...#...2.\
-            ..2...@.@...2..\
-            @..2...@...2..@\
-            ....2.....2....\
-            .#...#...#...#.\
-            ..@...@.@...@..\
-            3..@...+...@..3\
-            ..@...@.@...@..\
-            .#...#...#...#.\
-            ....2.....2....\
-            @..2...@...2..@\
-            ..2...@.@...2..\
-            .2...#...#...2.\
-            3..@...3...@..3"
-        )
+        Board::from(config::DEFAULT_BOARD)
     }
 
-    fn in_bounds(&self, x: u32, y: u32) -> bool {
+    pub fn check_in_bounds(&self, x: u32, y: u32) -> bool {
         x < self.width && y < self.height
     }
 
-    fn at(&self, x: u32, y: u32) -> Result<&Tile, String> {
-        if !self.in_bounds(x, y) {
+    pub fn at(&self, x: u32, y: u32) -> Result<&Tile, String> {
+        if !self.check_in_bounds(x, y) {
             return Err(format!("Coordinates out of bounds"));
         }
 
         Ok(&self.tiles[(y * self.width + x) as usize])
     }
 
-    fn get_starting_spot(&self) -> Option<(u32, u32)> {
+    pub fn get_starting_spot(&self) -> Option<(u32, u32)> {
         let mut index: u32 = 0;
         for tile in self.tiles.iter() {
             if *tile == Tile::Starting {
@@ -80,11 +55,94 @@ impl Board {
 
         None
     }
+
+    pub fn iterate<F>(&self, start: (u32, u32), direction: (u32, u32), len: u32, mut f: F)
+    where
+        F: FnMut(&Tile) -> ()
+    {
+        if len == 0 {
+            return;
+        }
+
+        let end_x = start.0 + direction.0 * (len - 1);
+        let end_y = start.1 + direction.1 * (len - 1);
+
+        assert_eq!(self.check_in_bounds(end_x, end_y), true);
+
+        let mut x = start.0;
+        let mut y = start.1;
+
+        for i in 0..len {
+            f(self.at(x, y).unwrap());
+
+            x += direction.0;
+            y += direction.1;
+        }
+    }
+
+    pub fn iterate_until<F>(&self, start: (u32, u32), direction: (u32, u32), mut f: F)
+    where
+        F: FnMut(&Tile) -> bool
+    {
+        let mut x = start.0;
+        let mut y = start.1;
+
+        loop {
+            if !self.check_in_bounds(x, y) || !f(self.at(x, y).unwrap()){
+                return;
+            }
+
+            x += direction.0;
+            y += direction.1;
+        }
+    }
+
+    pub fn extend_word(&self, action: &mut Action) {
+
+    }
 }
+
 
 #[cfg(test)]
 mod tests {
     use super::{Tile, Board};
+
+    #[test]
+    fn test_iterate_until() {
+        let board = get_board();
+        let expected_tiles = vec!(Tile::Empty, Tile::TripleLetter, Tile::Letter('C'));
+
+        let mut idx = 0;
+
+        board.iterate_until((0, 0), (1, 1), |tile: &Tile| -> bool {
+            println!("idx: {}", idx);
+            if idx == 2 {
+                return false;
+            }
+
+            assert_eq!(tile, &expected_tiles[idx]);
+            idx += 1;
+            return true;
+        });
+
+        assert_eq!(idx, 2);
+    }
+
+
+    #[test]
+    fn test_iterate() {
+        let board = get_board();
+        let expected_tiles = vec!(Tile::Empty, Tile::TripleLetter, Tile::Letter('C'));
+
+        let mut idx = 0;
+
+        board.iterate((0, 0), (1, 1), 3, |tile: &Tile| {
+            assert_eq!(tile, &expected_tiles[idx]);
+            idx += 1;
+        });
+
+        assert_eq!(idx, 3);
+    }
 
     #[test]
     fn parses_correct_dimensions2() {
@@ -97,8 +155,7 @@ mod tests {
 
     #[test]
     fn parses_correctly() {
-        let board_string = ".23@#+ABC";
-        let board = Board::from(board_string);
+        let board = get_board();
 
         assert_eq!(board.width, 3);
         assert_eq!(board.height, 3);
@@ -109,26 +166,23 @@ mod tests {
 
     #[test]
     fn tile_to_string_identities() {
-        let board_string = ".23@#+ABC";
-        let board = Board::from(board_string);
+        let board = get_board();
 
-        assert_eq!(Into::<String>::into(board), board_string);
+        assert_eq!(Into::<String>::into(board), ".23@#+ABC");
     }
 
     #[test]
-    fn in_bounds() {
-        let board_string = ".23@#+ABC";
-        let board = Board::from(board_string);
+    fn check_in_bounds() {
+        let board = get_board();
 
-        assert_eq!(board.in_bounds(0, 0), true);
-        assert_eq!(board.in_bounds(2, 2), true);
-        assert_eq!(board.in_bounds(3, 3), false);
+        assert_eq!(board.check_in_bounds(0, 0), true);
+        assert_eq!(board.check_in_bounds(2, 2), true);
+        assert_eq!(board.check_in_bounds(3, 3), false);
     }
 
     #[test]
-    fn at() {
-        let board_string = ".23@#+ABC";
-        let board = Board::from(board_string);
+    fn test_at() {
+        let board = get_board();
 
         assert_eq!(board.at(0, 0).is_ok(), true);
         assert_eq!(board.at(0, 0).unwrap(), &Tile::Empty);
@@ -141,8 +195,7 @@ mod tests {
 
     #[test]
     fn get_starting_spot() {
-        let board_string = ".23@#+ABC";
-        let board = Board::from(board_string);
+        let board = get_board();
         assert_eq!(board.get_starting_spot(), Some((2, 1)));
 
         let board_string = ".23@#.ABC";
@@ -156,5 +209,13 @@ mod tests {
 
         assert_eq!(board.width, 15);
         assert_eq!(board.height, 15);
+    }
+
+    fn get_board() -> Board {
+        let board_string = "\
+        .23\
+        @#+\
+        ABC";
+        return Board::from(board_string);
     }
 }

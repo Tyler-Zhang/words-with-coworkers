@@ -98,7 +98,6 @@ impl Board {
     }
 
     pub fn extend_word(&self, action: &mut Action) {
-
     }
 }
 
@@ -115,7 +114,6 @@ mod tests {
         let mut idx = 0;
 
         board.iterate_until((0, 0), (1, 1), |tile: &Tile| -> bool {
-            println!("idx: {}", idx);
             if idx == 2 {
                 return false;
             }

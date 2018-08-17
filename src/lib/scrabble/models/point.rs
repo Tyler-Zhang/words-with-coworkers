@@ -1,4 +1,4 @@
-use std::ops::{Add, AddAssign};
+use std::ops::{Add, AddAssign, Sub};
 use super::Direction;
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -37,6 +37,14 @@ impl Add<Direction> for Point {
 
     fn add(self, rhs: Direction) -> Self {
         Self::new(self.x() + rhs.x(), self.y() + rhs.y())
+    }
+}
+
+impl Sub<Direction> for Point {
+    type Output = Point;
+
+    fn sub(self, rhs: Direction) -> Self {
+        self.add(-rhs)
     }
 }
 

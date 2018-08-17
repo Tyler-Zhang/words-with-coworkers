@@ -60,7 +60,7 @@ impl Board {
     where
         F: FnMut(&Tile) -> ()
     {
-        if len == 0 {
+        if len <= 0 {
             return;
         }
 

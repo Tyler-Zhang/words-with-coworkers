@@ -18,7 +18,7 @@ impl Word {
     }
 
     pub fn get_end(&self) -> Point {
-        self.start + (self.direction * (self.letters.len() as i32))
+        self.start + (self.direction * ((self.letters.len() - 1usize) as i32))
     }
 }
 
@@ -32,6 +32,6 @@ mod tests {
         let end = word.get_end();
 
         assert_eq!(end.x(), 1);
-        assert_eq!(end.y(), 10);
+        assert_eq!(end.y(), 9);
     }
 }

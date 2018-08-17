@@ -2,14 +2,14 @@ use super::Direction;
 
 pub struct Action<'a> {
     pub word: &'a str,
-    pub start: (u32, u32),
+    pub start: (i32, i32),
     pub direction: Direction,
     pub direction_down: bool,
     pub log: Vec<String>
 }
 
 impl<'a> Action<'a> {
-    pub fn new(word: &'a str, start: (u32, u32), direction_down: bool) -> Action<'a> {
+    pub fn new(word: &'a str, start: (i32, i32), direction_down: bool) -> Action<'a> {
         Action {
             word,
             start,

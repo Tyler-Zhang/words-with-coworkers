@@ -1,16 +1,16 @@
-use super::{Tile, Action};
+use super::{Tile, Action, Direction};
 use super::super::config;
 
 pub struct Board {
-    pub width: u32,
-    pub height: u32,
+    pub width: i32,
+    pub height: i32,
     pub tiles: Vec<Tile>
 }
 
 impl<'a> From<&'a str> for Board {
     fn from(s: &str) -> Self {
         let tile_count = s.len();
-        let dimension = (tile_count as f64).sqrt() as u32;
+        let dimension = (tile_count as f64).sqrt() as i32;
         let tiles: Vec<Tile> = s.chars().map(|c| Tile::from(c)).collect();
 
         Board { width: dimension, height: dimension, tiles: tiles }
@@ -28,11 +28,11 @@ impl Board {
         Board::from(config::DEFAULT_BOARD)
     }
 
-    pub fn check_in_bounds(&self, x: u32, y: u32) -> bool {
-        x < self.width && y < self.height
+    pub fn check_in_bounds(&self, x: i32, y: i32) -> bool {
+        x < self.width && y < self.height && x >= 0 && y >= 0
     }
 
-    pub fn at(&self, x: u32, y: u32) -> Result<&Tile, String> {
+    pub fn at(&self, x: i32, y: i32) -> Result<&Tile, String> {
         if !self.check_in_bounds(x, y) {
             return Err(format!("Coordinates out of bounds"));
         }
@@ -40,8 +40,8 @@ impl Board {
         Ok(&self.tiles[(y * self.width + x) as usize])
     }
 
-    pub fn get_starting_spot(&self) -> Option<(u32, u32)> {
-        let mut index: u32 = 0;
+    pub fn get_starting_spot(&self) -> Option<(i32, i32)> {
+        let mut index: i32 = 0;
         for tile in self.tiles.iter() {
             if *tile == Tile::Starting {
                 break;
@@ -49,14 +49,14 @@ impl Board {
             index += 1;
         }
 
-        if index < self.tiles.len() as u32 {
+        if index < self.tiles.len() as i32 {
             return Some((index % self.width, index / self.width));
         }
 
         None
     }
 
-    pub fn iterate<F>(&self, start: (u32, u32), direction: (u32, u32), len: u32, mut f: F)
+    pub fn iterate<F>(&self, start: (i32, i32), direction: Direction, len: i32, mut f: F)
     where
         F: FnMut(&Tile) -> ()
     {
@@ -64,8 +64,8 @@ impl Board {
             return;
         }
 
-        let end_x = start.0 + direction.0 * (len - 1);
-        let end_y = start.1 + direction.1 * (len - 1);
+        let end_x = start.0 + direction.x() * (len - 1);
+        let end_y = start.1 + direction.y() * (len - 1);
 
         assert_eq!(self.check_in_bounds(end_x, end_y), true);
 
@@ -75,12 +75,12 @@ impl Board {
         for i in 0..len {
             f(self.at(x, y).unwrap());
 
-            x += direction.0;
-            y += direction.1;
+            x += direction.x();
+            y += direction.y();
         }
     }
 
-    pub fn iterate_until<F>(&self, start: (u32, u32), direction: (u32, u32), mut f: F)
+    pub fn iterate_until<F>(&self, start: (i32, i32), direction: Direction, mut f: F)
     where
         F: FnMut(&Tile) -> bool
     {
@@ -92,19 +92,23 @@ impl Board {
                 return;
             }
 
-            x += direction.0;
-            y += direction.1;
+            x += direction.x();
+            y += direction.y();
         }
     }
 
     pub fn extend_word(&self, action: &mut Action) {
+        let mut extension_backwards: i32 = 0;
+        let mut extension_forwards: i32 = 0;
+
+
     }
 }
 
 
 #[cfg(test)]
 mod tests {
-    use super::{Tile, Board};
+    use super::{Tile, Board, Direction};
 
     #[test]
     fn test_iterate_until() {
@@ -113,7 +117,7 @@ mod tests {
 
         let mut idx = 0;
 
-        board.iterate_until((0, 0), (1, 1), |tile: &Tile| -> bool {
+        board.iterate_until((0, 0), Direction::new(1, 1), |tile: &Tile| -> bool {
             if idx == 2 {
                 return false;
             }
@@ -134,7 +138,7 @@ mod tests {
 
         let mut idx = 0;
 
-        board.iterate((0, 0), (1, 1), 3, |tile: &Tile| {
+        board.iterate((0, 0), Direction::new(1, 1), 3, |tile: &Tile| {
             assert_eq!(tile, &expected_tiles[idx]);
             idx += 1;
         });

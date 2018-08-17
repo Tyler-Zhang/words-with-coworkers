@@ -1,4 +1,4 @@
-use super::{Tile, Word, Direction, Point};
+use super::{Tile, Direction, Point};
 use super::super::config;
 
 pub struct Board {

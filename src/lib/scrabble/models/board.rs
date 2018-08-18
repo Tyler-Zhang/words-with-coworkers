@@ -40,7 +40,7 @@ impl Board {
         Ok(&self.tiles[(point.y() * self.width + point.x()) as usize])
     }
 
-    pub fn get_starting_spot(&self) -> Option<(i32, i32)> {
+    pub fn get_starting_spot(&self) -> Option<Point> {
         let mut index: i32 = 0;
         for tile in self.tiles.iter() {
             if *tile == Tile::Starting {
@@ -50,7 +50,7 @@ impl Board {
         }
 
         if index < self.tiles.len() as i32 {
-            return Some((index % self.width, index / self.width));
+            return Some(Point::new(index % self.width, index / self.width));
         }
 
         None
@@ -183,7 +183,7 @@ mod tests {
     #[test]
     fn get_starting_spot() {
         let board = get_board();
-        assert_eq!(board.get_starting_spot(), Some((2, 1)));
+        assert_eq!(board.get_starting_spot(), Some(Point::new(2, 1)));
 
         let board_string = ".23@#.ABC";
         let board = Board::from(board_string);

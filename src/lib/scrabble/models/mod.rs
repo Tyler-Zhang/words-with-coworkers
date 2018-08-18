@@ -6,6 +6,8 @@ pub mod word;
 pub mod direction;
 pub mod action;
 pub mod point;
+pub mod letters;
+pub mod line;
 
 pub use self::board::Board;
 pub use self::game::Game;
@@ -15,3 +17,5 @@ pub use self::word::Word;
 pub use self::direction::Direction;
 pub use self::action::Action;
 pub use self::point::Point;
+pub use self::letters::Letters;
+pub use self::line::Line;

@@ -1,7 +1,7 @@
 use super::super::models::{Board, Word, Tile, Point};
 
 pub fn extend_word(board: &Board, word: &mut Word) {
-    let mut letter_chars: Vec<char> = word.letters.chars().collect();
+    let mut letter_chars: Vec<char> = word.letters.clone();
 
     let mut backwards_extend_length: i32 = 0;
 
@@ -26,7 +26,7 @@ pub fn extend_word(board: &Board, word: &mut Word) {
         false
     });
 
-    word.letters = letter_chars.iter().collect::<String>();
+    word.letters = letter_chars;
     word.start = word.start - (word.direction * backwards_extend_length);
 }
 
@@ -48,7 +48,7 @@ mod tests {
 
         extend_word(&board, &mut word);
 
-        assert_eq!(word.letters, "EFBC");
+        assert_eq!(word.letters.iter().collect::<String>(), "EFBC");
         assert_eq!(word.start, Point::new(2, 0));
         assert_eq!(word.get_end(), Point::new(2, 3));
     }

@@ -73,8 +73,6 @@ impl Game {
         }
     }
 
-    // pub fn letters_needed_for_place(&self, word: &Word) ->
-
     fn play<'a>(&mut self, word: &'a str, start: (i32, i32), direction_down: bool, dict: &HashSet<String>) -> Result<Action, String> {
         let mut word = Word::new(word.to_owned(), start, direction_down);
         utils::word::extend_word(&self.board, &mut word);

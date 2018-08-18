@@ -73,3 +73,17 @@ pub fn generate_default_pieces() -> String {
 
     String::from_utf8(shuffled).expect("Shuffle pieces")
 }
+
+// Get how much a letter is worth
+pub fn get_letter_score (c: char) -> i32 {
+    match c {
+        'E' | 'A' | 'I' | 'O' | 'N' | 'R' | 'T' | 'L' | 'S' | 'U' => 1,
+        'D' | 'G'  => 2,
+        'B' | 'C' | 'M' | 'P' => 3,
+        'F' | 'H' | 'V' | 'W' | 'Y' => 4,
+        'K' => 5,
+        'J' | 'X' => 8,
+        'Q' | 'Z' => 10,
+        _ => panic!(format!("Trying to get string for invalid char {}", c))
+    }
+}

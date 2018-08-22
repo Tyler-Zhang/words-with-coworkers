@@ -1,1 +1,1 @@
-pub mod game_operations;
+pub mod game_adapter_operations;

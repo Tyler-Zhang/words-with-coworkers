@@ -23,6 +23,12 @@ impl Into<String> for Board {
     }
 }
 
+impl ToString for Board {
+    fn to_string(&self) -> String {
+        self.tiles.into_iter().map(|tile| Into::<char>::into(tile)).collect::<String>()
+    }
+}
+
 impl Board {
     pub fn new_default_board() -> Self {
         Board::from(config::DEFAULT_BOARD)

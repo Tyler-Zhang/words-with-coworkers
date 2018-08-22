@@ -12,6 +12,14 @@ pub struct GameAdapter {
 }
 
 impl GameAdapter {
+    pub fn new(scrabble_game: scrabble::Game, db_game: Game, db_players: Vec<Player>) -> GameAdapter{
+        GameAdapter {
+            scrabble_game,
+            db_game,
+            db_players
+        }
+    }
+
     pub fn hydrate(db_game: Game, db_players: Vec<Player>) -> GameAdapter {
         let scrabble_game = scrabble::Game::hydrate(
             scrabble::Board::from(&db_game.board[..]),
@@ -41,7 +49,7 @@ impl GameAdapter {
         &self.db_players[index as usize]
     }
 
-    fn sync_with_scrabble_game(&mut self) {
+    pub fn sync_with_scrabble_game(&mut self) {
         // Sync game model
         self.db_game.board = self.scrabble_game.board.into();
         self.db_game.turn_count = self.scrabble_game.turn_count;

@@ -6,7 +6,7 @@ pub fn format_game_state(state: (&Game, &Vec<Player>), include_players: bool) ->
     let mut current_player_turn_str = "";
 
     let player_turn_id = state.0.player_turn_id.unwrap();
-    
+
     for player in state.1 {
         if player.id == player_turn_id {
             current_player_turn_str = &player.slack_id;
@@ -17,9 +17,9 @@ pub fn format_game_state(state: (&Game, &Vec<Player>), include_players: bool) ->
         It is currently <@{}>'s turn
         \n{}\
         \n{}\
-        ", 
-        current_player_turn_str, 
-        game_board_to_str(state.0, true), 
+        ",
+        current_player_turn_str,
+        game_board_to_str(state.0, true),
         if include_players { players_to_str(state.1) } else { "".to_string() }
     )
 }
@@ -28,10 +28,10 @@ fn players_to_str(players: &Vec<Player>) -> String {
     players.iter().map(|player| format!("<@{}> - {}", player.slack_id, player.points)).collect::<Vec<String>>().join("\n")
 }
 
-fn game_board_to_str<'a>(game: &'a Game, use_emoji: bool) -> String {
+fn game_board_to_str(game: &Game, use_emoji: bool) -> String {
     let board = &game.board;
     let width = game.board_width as usize;
-    
+
     let mut printout = String::new();
 
     if use_emoji {

@@ -1,107 +1,70 @@
-use std::char;
-use ::models::{Game, Player};
+use ::models::GameAdapter;
+use ::models::Player;
+use ::lib::{scrabble, slack};
 
+use self::scrabble::Tile;
+use self::slack::{Emoji, ScrabbleBoardTile, Tag};
 
-pub fn format_game_state(state: (&Game, &Vec<Player>), include_players: bool) -> String {
-    let mut current_player_turn_str = "";
-
-    let player_turn_id = state.0.player_turn_id.unwrap();
-
-    for player in state.1 {
-        if player.id == player_turn_id {
-            current_player_turn_str = &player.slack_id;
+impl scrabble::Tile {
+    pub fn to_emoji(&self) -> Emoji {
+        match self {
+            &Tile::DoubleLetter => Emoji::ScrabbleBoardTile(ScrabbleBoardTile::DoubleLetter),
+            &Tile::TripleLetter => Emoji::ScrabbleBoardTile(ScrabbleBoardTile::TripleLetter),
+            &Tile::DoubleWord => Emoji::ScrabbleBoardTile(ScrabbleBoardTile::DoubleWord),
+            &Tile::TripleWord => Emoji::ScrabbleBoardTile(ScrabbleBoardTile::TripleWord),
+            &Tile::Empty => Emoji::ScrabbleBoardTile(ScrabbleBoardTile::Board),
+            &Tile::Starting => Emoji::ScrabbleBoardTile(ScrabbleBoardTile::Start),
+            &Tile::Letter(c) => Emoji::ScrabbleLetter(c)
         }
     }
+}
 
+pub fn format_game(game: &GameAdapter, include_players: bool) -> String {
     format!("\
-        It is currently <@{}>'s turn
+        It is currently {}'s turn
         \n{}\
         \n{}\
         ",
-        current_player_turn_str,
-        game_board_to_str(state.0, true),
-        if include_players { players_to_str(state.1) } else { "".to_string() }
+        Tag(&game.get_player_on_turn().slack_id).to_string(),
+        board_to_string(&game.scrabble_game.board),
+        if include_players { players_to_str(&game.db_players) } else { "".to_string() }
     )
 }
 
 fn players_to_str(players: &Vec<Player>) -> String {
-    players.iter().map(|player| format!("<@{}> - {}", player.slack_id, player.points)).collect::<Vec<String>>().join("\n")
+    players.iter().map(|player| format!("{} - {}", Tag(&player.slack_id).to_string(), player.points))
+        .collect::<Vec<String>>()
+        .join("\n")
+
 }
 
-fn game_board_to_str(game: &Game, use_emoji: bool) -> String {
-    let board = &game.board;
-    let width = game.board_width as usize;
+fn board_to_string(board: &scrabble::Board) -> String {
+    let width = board.width;
 
     let mut printout = String::new();
 
-    if use_emoji {
-        let mut header_numbers = String::from(":white_square:");
-        for i in 0..game.board_width {
-            header_numbers.push_str(&translate_number_to_emoji(i));
+    // Add headers in
+    printout += &Emoji::WhiteSquare.to_string();
+
+    for i in 0..board.width {
+        printout += &Emoji::Number(i % 10).to_string();
+    }
+    printout += "\n";
+
+    // Enumerate through tiles
+    for (index, tile) in board.tiles.iter().enumerate() {
+        let index = index as i32;
+
+        if index % board.width == 0 {
+            if index != 0 {
+                printout += "\n";
+            }
+
+            printout += &Emoji::Number(index/board.width % 10).to_string();
         }
 
-        printout.push_str(&(header_numbers + &"\n"));
-
-        for row in 0..board.len() / width  {
-            printout.push_str(&translate_number_to_emoji(row as i32));
-            for c in board[row*width..row*width + width].to_owned().into_bytes() {
-                printout += &emoji_translator(c as char);
-            }
-            printout += &"\n";
-        }
-    } else {
-        for row in 0..board.len() / width  {
-            for c in board[row*width..row*width + width].to_owned().into_bytes() {
-                printout += &format!("{}", c);
-            }
-            printout += &"\n";
-        }
+        printout += &tile.to_emoji().to_string();
     }
 
     printout
-}
-
-pub fn translate_number_to_emoji (num: i32) -> String {
-    format!(":{}:", number_to_word(num % 10))
-}
-
-pub fn number_to_word (num: i32) -> String {
-    match num {
-        0 => format!("zero"),
-        1 => format!("one"),
-        2 => format!("two"),
-        3 => format!("three"),
-        4 => format!("four"),
-        5 => format!("five"),
-        6 => format!("six"),
-        7 => format!("seven"),
-        8 => format!("eight"),
-        9 => format!("nine"),
-        _ => panic!(format!("{} too high", num))
-    }
-}
-
-pub fn translate_letters_to_emoji (text: &str) -> String {
-    text.to_owned()
-        .into_bytes()
-        .into_iter()
-        .map(|c| emoji_translator(c as char))
-        .collect::<Vec<String>>()
-        .join("")
-}
-
-fn emoji_translator(symbol: char) -> String {
-    if symbol >= 'A' && symbol <= 'Z' {
-        return format!(":scrabble-{}:", char::from_u32((symbol as u32) + 32).unwrap());
-    } else {
-        match symbol {
-            '.' => String::from(":scrabble_board:"),
-            '2' => String::from(":scrabble_double_word:"),
-            '3' => String::from(":scrabble_triple_word:"),
-            '@' => String::from(":scrabble_double_letter:"),
-            '#' => String::from(":scrabble_triple_letter:"),
-            '+' => String::from(":scrabble_start:"),
-            _ => format!("{}", symbol)
-        }
-    }
 }

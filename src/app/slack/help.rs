@@ -1,5 +1,5 @@
+use ::lib::slack;
 use super::SlackResponse;
-use operations::game_operations::printing::translate_letters_to_emoji;
 
 pub fn help() -> Result<SlackResponse, String> {
   let help_message = format!("\
@@ -19,7 +19,7 @@ in game:
 >When in a game, you must specify the the entirety of the word in the direction that you are playing
 >For example: if {} is on the board and you want to play {}, you must specify the entire word
 >'fart' and not just 'art'
-", translate_letters_to_emoji("F"), translate_letters_to_emoji("FART"));
+", slack::emoji::str_to_emoji_string("F"), slack::emoji::str_to_emoji_string("FART"));
 
 
   Ok(SlackResponse { text: help_message.to_string(), response_type: Some("ephemeral".to_string()) })

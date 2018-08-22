@@ -3,7 +3,7 @@ use std::io::{BufReader, BufRead};
 use std::fs::File;
 
 pub struct ScrabbleDictionary {
-    words: HashSet<String>
+    pub words: HashSet<String>
 }
 
 impl ScrabbleDictionary {
@@ -13,7 +13,7 @@ impl ScrabbleDictionary {
 
         let f = File::open(path).expect("File not found");
         let file = BufReader::new(&f);
-        
+
         for (_num, line) in file.lines().enumerate() {
             words.insert(line.unwrap());
         }

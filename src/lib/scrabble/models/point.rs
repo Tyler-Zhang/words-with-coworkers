@@ -60,9 +60,3 @@ impl AddAssign<Direction> for Point {
         self.1 += rhs.y();
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-}

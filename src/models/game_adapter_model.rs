@@ -49,19 +49,35 @@ impl GameAdapter {
         &self.db_players[index as usize]
     }
 
+    pub fn get_player_on_turn_mut(&mut self) -> &mut Player {
+        let index = self.scrabble_game.get_player_turn_index();
+
+        &mut self.db_players[index as usize]
+    }
+
+    pub fn get_player_by_user_id_mut(&mut self, slack_id: &str) -> Option<&mut Player> {
+        for player in self.db_players.iter_mut() {
+            if player.slack_id == slack_id {
+                return Some(player);
+            }
+        }
+
+        None
+    }
+
     pub fn sync_with_scrabble_game(&mut self) {
         // Sync game model
-        self.db_game.board = self.scrabble_game.board.into();
+        self.db_game.board = self.scrabble_game.board.to_string();
         self.db_game.turn_count = self.scrabble_game.turn_count;
         let player_turn = self.scrabble_game.get_player_turn_index();
         self.db_game.player_turn_id = Some(self.db_players[player_turn as usize].id);
-        self.db_game.pieces = self.scrabble_game.pieces;
+        self.db_game.pieces = self.scrabble_game.pieces.clone();
 
         let scrabble_players = &self.scrabble_game.players;
 
         // Sync player models
         for (index, db_player) in self.db_players.iter_mut().enumerate() {
-            db_player.pieces = scrabble_players[index].pieces;
+            db_player.pieces = scrabble_players[index].pieces.clone();
             db_player.points = scrabble_players[index].score;
         }
     }

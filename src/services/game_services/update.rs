@@ -3,9 +3,9 @@ use diesel::PgConnection;
 use diesel::prelude::*;
 use ::models::{Game};
 
-pub fn update(conn: &PgConnection, game: &Game) -> Game {
+pub fn update(conn: &PgConnection, game: &Game) -> Result<Game, String> {
     diesel::update(game)
         .set(game)
         .get_result(conn)
-        .expect("Could not update game")
+        .or(Err(format!("Could not update game")))
 }

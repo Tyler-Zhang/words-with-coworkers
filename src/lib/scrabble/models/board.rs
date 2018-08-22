@@ -19,13 +19,19 @@ impl<'a> From<&'a str> for Board {
 
 impl Into<String> for Board {
     fn into(self) -> String {
-        self.tiles.into_iter().map(|tile| Into::<char>::into(tile)).collect::<String>()
+        self.tiles
+            .into_iter()
+            .map(|tile| tile.to_char())
+            .collect::<String>()
     }
 }
 
 impl ToString for Board {
     fn to_string(&self) -> String {
-        self.tiles.into_iter().map(|tile| Into::<char>::into(tile)).collect::<String>()
+        self.tiles
+            .iter()
+            .map(|tile| tile.to_char())
+            .collect::<String>()
     }
 }
 
@@ -74,7 +80,7 @@ impl Board {
 
         let mut curr = start;
 
-        for i in 0..len {
+        for _i in 0..len {
             f(self.at(curr).unwrap());
 
             curr += direction;

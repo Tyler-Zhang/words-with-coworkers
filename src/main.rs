@@ -15,6 +15,7 @@ extern crate serde_urlencoded;
 
 extern crate uuid;
 extern crate failure;
+
 #[macro_use]
 extern crate failure_derive;
 

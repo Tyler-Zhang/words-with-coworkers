@@ -14,7 +14,8 @@ impl ScrabbleBoardTile {
             &ScrabbleBoardTile::DoubleWord => "double_word",
             &ScrabbleBoardTile::TripleWord => "triple_word",
             &ScrabbleBoardTile::DoubleLetter => "double_letter",
-            &ScrabbleBoardTile::TripleLetter => "triple_letter"
+            &ScrabbleBoardTile::TripleLetter => "triple_letter",
+            &ScrabbleBoardTile::Start => "start"
         }
     }
 }

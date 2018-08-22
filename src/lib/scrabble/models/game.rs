@@ -42,7 +42,8 @@ impl Game {
     }
 
     pub fn get_player_on_turn(&mut self) -> &mut Player {
-        &mut self.players[self.get_player_turn_index() as usize]
+        let player_turn_index = self.get_player_turn_index();
+        &mut self.players[player_turn_index as usize]
     }
 
     pub fn verify_word_in_bounds(&self, word: &Word) -> Result<(), String> {

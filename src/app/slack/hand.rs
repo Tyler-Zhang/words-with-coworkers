@@ -1,14 +1,14 @@
 use diesel::PgConnection;
 use super::{SlackCommand, SlackResponse};
 use regex::Regex;
-use ::services::{game_services, player_services};
+use ::services::player_services;
 use rand::{thread_rng, Rng};
-use ::operations::{game_operations};
+use ::operations::game_adapter_operations;
+use ::lib::slack;
 
 pub fn hand(command: &SlackCommand, db: &PgConnection) -> Result<SlackResponse, String> {
-    let game = game_services::get_by_channel_id(db, &command.channel_id)?;
-
-    let player = player_services::get_player_from_game(db, &game, &command.user_id);
+    let mut game_adapter = game_adapter_operations::get_game::get_game(&command.channel_id, db)?;
+    let player = game_adapter.get_player_by_user_id_mut(&command.user_id);
 
     if player.is_none() {
         return Ok(SlackResponse::new("You are not participating in the game".to_string(), false));
@@ -18,7 +18,7 @@ pub fn hand(command: &SlackCommand, db: &PgConnection) -> Result<SlackResponse, 
 
     if should_scramble(command.text.as_str())? {
         // Scramble the hand's pieces
-        let mut shuffled: Vec<u8> = player.pieces.into_bytes();
+        let mut shuffled: Vec<u8> = player.pieces.clone().into_bytes();
         thread_rng().shuffle(&mut shuffled);
 
         player.pieces = String::from_utf8(shuffled).expect("Shuffle pieces");
@@ -26,7 +26,7 @@ pub fn hand(command: &SlackCommand, db: &PgConnection) -> Result<SlackResponse, 
     }
 
     Ok(SlackResponse::new(
-        format!("Your letters are: {}", game_operations::printing::translate_letters_to_emoji(&player.pieces)),
+        format!("Your letters are: {}", slack::emoji::str_to_emoji_string(&player.pieces)),
         false
     ))
 }

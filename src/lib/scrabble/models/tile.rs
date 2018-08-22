@@ -23,20 +23,6 @@ impl From<char> for Tile {
     }
 }
 
-impl Into<char> for Tile {
-    fn into(self) -> char {
-        match self {
-            Tile::Empty         => '.',
-            Tile::DoubleWord    => '2',
-            Tile::TripleWord    => '3',
-            Tile::DoubleLetter  => '@',
-            Tile::TripleLetter  => '#',
-            Tile::Starting      => '+',
-            Tile::Letter(c)     => c
-        }
-    }
-}
-
 // Returns (word_multiplier, letter_multiplier)
 impl Tile {
     pub fn get_multiplier(&self) -> (i32, i32) {
@@ -47,6 +33,18 @@ impl Tile {
             Tile::DoubleLetter  => (1, 2),
             Tile::TripleLetter  => (1, 3),
             _                   => (1, 1)
+        }
+    }
+
+    pub fn to_char(&self) -> char {
+        match self {
+            &Tile::Empty         => '.',
+            &Tile::DoubleWord    => '2',
+            &Tile::TripleWord    => '3',
+            &Tile::DoubleLetter  => '@',
+            &Tile::TripleLetter  => '#',
+            &Tile::Starting      => '+',
+            &Tile::Letter(c)     => c
         }
     }
 }
@@ -66,13 +64,13 @@ mod tests {
     }
 
     #[test]
-    fn into() {
-        assert_eq!(Into::<char>::into(Tile::DoubleLetter), '@');
-        assert_eq!(Into::<char>::into(Tile::TripleLetter), '#');
-        assert_eq!(Into::<char>::into(Tile::Starting), '+');
-        assert_eq!(Into::<char>::into(Tile::Letter('A')), 'A');
-        assert_eq!(Into::<char>::into(Tile::Letter('B')), 'B');
-        assert_eq!(Into::<char>::into(Tile::Letter('C')), 'C');
+    fn to_char() {
+        assert_eq!(Tile::DoubleLetter.to_char(), '@');
+        assert_eq!(Tile::TripleLetter.to_char(), '#');
+        assert_eq!(Tile::Starting.to_char(), '+');
+        assert_eq!(Tile::Letter('A').to_char(), 'A');
+        assert_eq!(Tile::Letter('B').to_char(), 'B');
+        assert_eq!(Tile::Letter('C').to_char(), 'C');
     }
 
     #[test]

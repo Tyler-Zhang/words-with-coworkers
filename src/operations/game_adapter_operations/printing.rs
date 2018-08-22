@@ -40,8 +40,6 @@ fn players_to_str(players: &Vec<Player>) -> String {
 }
 
 fn board_to_string(board: &scrabble::Board) -> String {
-    let width = board.width;
-
     let mut printout = String::new();
 
     // Add headers in

@@ -2,10 +2,13 @@ use diesel::PgConnection;
 use diesel::prelude::*;
 use ::models::{Player, Game};
 
-pub fn get_players_from_game(conn: &PgConnection, game: &Game) -> Vec<Player> {
+pub fn get_players_from_game(conn: &PgConnection, game: &Game) -> Result<Vec<Player>, String> {
     use ::schema::players::dsl::*;
 
-    Player::belonging_to(game).order(id).get_results(conn).expect("Could not load players")
+    Player::belonging_to(game)
+        .order(id)
+        .get_results(conn)
+        .or(Err(format!("Could not load players")))
 }
 
 pub fn get_player_from_game(conn: &PgConnection, game: &Game, slack_id_query: &str) -> Option<Player> {

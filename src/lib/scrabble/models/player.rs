@@ -2,7 +2,7 @@ use super::super::utils::string;
 
 pub struct Player {
     pub pieces: String,
-    pub score: u32
+    pub score: i32
 }
 
 impl Player {
@@ -11,9 +11,15 @@ impl Player {
     }
 
     pub fn remove_pieces(&mut self, pieces: &str) -> Result<(), String> {
-        self.pieces = string::remove_from_string(&self.pieces, pieces)?;
+        self.pieces = string::remove_from_string(&self.pieces, pieces).or(
+            Err(format!("Does not have the required letters"))
+        )?;
 
         Ok(())
+    }
+
+    pub fn give_pieces(&mut self, pieces: &str) {
+        self.pieces += pieces
     }
 }
 

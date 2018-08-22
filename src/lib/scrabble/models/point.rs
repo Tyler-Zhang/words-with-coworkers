@@ -32,6 +32,12 @@ impl From<(i32, i32)> for Point {
     }
 }
 
+impl Into<(i32, i32)> for Point {
+    fn into(self) -> (i32, i32) {
+        (self.0, self.1)
+    }
+}
+
 impl Add<Direction> for Point {
     type Output = Point;
 

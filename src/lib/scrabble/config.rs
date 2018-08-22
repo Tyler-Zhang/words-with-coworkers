@@ -1,6 +1,6 @@
 use rand::{thread_rng, Rng};
 
-pub static PLAYER_HAND_PIECES_COUNT: u32 = 7;
+pub static PLAYER_HAND_PIECES_COUNT: i32 = 7;
 
 /*
     This generates the default game board using the following symbols:
@@ -27,6 +27,10 @@ pub static DEFAULT_BOARD: &str ="\
     ..2...@.@...2..\
     .2...#...#...2.\
     3..@...3...@..3";
+
+pub static BINGO_LETTERS_PLAYED: i32 = 7;
+
+pub static BINGO_POINT_VALUE: i32 = 70;
 
 /*as
     This generates the inital "bag" of pieces that have not been picked

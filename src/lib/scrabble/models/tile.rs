@@ -37,8 +37,9 @@ impl Into<char> for Tile {
     }
 }
 
+// Returns (word_multiplier, letter_multiplier)
 impl Tile {
-    fn get_multiplier(&self) -> (i32, i32) {
+    pub fn get_multiplier(&self) -> (i32, i32) {
         match self {
             Tile::DoubleWord    => (2, 1),
             Tile::Starting      => (2, 1),

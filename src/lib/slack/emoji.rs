@@ -46,6 +46,13 @@ impl ToString for Emoji {
     }
 }
 
+pub fn str_to_emoji_string(s: &str) -> String {
+    s.chars()
+        .map(|c| Emoji::ScrabbleLetter(c).to_string())
+        .collect::<Vec<String>>()
+        .join("")
+}
+
 fn number_to_word (num: &i32) -> &'static str {
     match num {
         0 => "zero",

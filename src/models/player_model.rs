@@ -13,7 +13,7 @@ pub struct Player {
     pub team_id: String
 }
 
-#[derive(Insertable)]
+#[derive(Insertable, Debug)]
 #[table_name="players"]
 pub struct NewPlayer<'a> {
     pub game_id: i32,

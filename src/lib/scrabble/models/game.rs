@@ -15,9 +15,13 @@ impl Game {
     pub fn new(player_count: i32) -> Self {
         let mut pieces = config::generate_default_pieces();
 
-        let players = [0..player_count].iter()
-            .map(|_| Player::new(&pieces.split_off(config::PLAYER_HAND_PIECES_COUNT as usize)))
-            .collect();
+        let players = (0..player_count)
+            .map(|_| {
+                let pieces_len = pieces.len();
+
+                Player::new(&pieces.split_off(pieces_len - config::PLAYER_HAND_PIECES_COUNT as usize))
+            })
+            .collect::<Vec<Player>>();
 
         Game {
             board: Board::new_default_board(),

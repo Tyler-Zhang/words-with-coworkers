@@ -9,5 +9,5 @@ pub fn create_players(conn: &PgConnection, players: &Vec<NewPlayer>) -> Result<V
     diesel::insert_into(players::table)
         .values(players)
         .get_results(conn)
-        .or(Err(format!("Problem inserting players")))
+        .or_else(|e| Err(e.to_string()))
 }

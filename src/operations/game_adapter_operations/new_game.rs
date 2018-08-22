@@ -37,6 +37,8 @@ pub fn create_game(
             })
             .collect::<Vec<NewPlayer>>();
 
+        println!("{:?}", new_players);
+
         player_services::create_players(conn, &new_players)?
     };
 

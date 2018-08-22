@@ -22,7 +22,7 @@ pub fn hand(command: &SlackCommand, db: &PgConnection) -> Result<SlackResponse, 
         thread_rng().shuffle(&mut shuffled);
 
         player.pieces = String::from_utf8(shuffled).expect("Shuffle pieces");
-        player_services::update(db, &player);
+        player_services::update(db, &player)?;
     }
 
     Ok(SlackResponse::new(

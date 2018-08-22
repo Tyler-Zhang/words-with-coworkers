@@ -5,10 +5,10 @@ use ::lib::scrabble;
 use ::models::{Game, Player};
 
 pub struct GameAdapter {
-    scrabble_game: scrabble::Game,
+    pub scrabble_game: scrabble::Game,
 
-    db_game: Game,
-    db_players: Vec<Player>
+    pub db_game: Game,
+    pub db_players: Vec<Player>
 }
 
 impl GameAdapter {
@@ -33,6 +33,12 @@ impl GameAdapter {
             let result_from_play = self.scrabble_game.play(word, start, direction_down, dict);
             self.sync_with_scrabble_game();
             result_from_play
+    }
+
+    pub fn get_player_on_turn(&self) -> &Player {
+        let index = self.scrabble_game.get_player_turn_index();
+
+        &self.db_players[index as usize]
     }
 
     fn sync_with_scrabble_game(&mut self) {

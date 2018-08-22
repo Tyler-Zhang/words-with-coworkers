@@ -3,7 +3,8 @@ use ::models::Player;
 use ::lib::{scrabble, slack};
 
 use self::scrabble::Tile;
-use self::slack::{Emoji, ScrabbleBoardTile, Tag};
+use self::slack::emoji::{Emoji, ScrabbleBoardTile};
+use self::slack::tag::Tag;
 
 impl scrabble::Tile {
     pub fn to_emoji(&self) -> Emoji {

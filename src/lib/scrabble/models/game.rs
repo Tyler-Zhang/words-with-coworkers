@@ -16,7 +16,7 @@ impl Game {
         let mut pieces = config::generate_default_pieces();
 
         let players = [0..player_count].iter()
-            .map(|_| Player::new(pieces.split_off(config::PLAYER_HAND_PIECES_COUNT as usize)))
+            .map(|_| Player::new(&pieces.split_off(config::PLAYER_HAND_PIECES_COUNT as usize)))
             .collect();
 
         Game {
@@ -27,11 +27,22 @@ impl Game {
         }
     }
 
-    pub fn get_player_on_turn(&mut self) -> &mut Player {
-        let player_count = self.players.len() as i32;
-        let player_idx = self.turn_count % player_count;
+    pub fn hydrate(board: Board, players: Vec<Player>, turn_count: i32, pieces: &str) -> Self {
+        Self {
+            board,
+            players,
+            turn_count,
+            pieces: pieces.to_string()
+        }
+    }
 
-        &mut self.players[player_idx as usize]
+    pub fn get_player_turn_index(&self) -> i32 {
+        let player_count = self.players.len() as i32;
+        self.turn_count % player_count
+    }
+
+    pub fn get_player_on_turn(&mut self) -> &mut Player {
+        &mut self.players[self.get_player_turn_index() as usize]
     }
 
     pub fn verify_word_in_bounds(&self, word: &Word) -> Result<(), String> {
@@ -151,7 +162,7 @@ impl Game {
         scored_words
     }
 
-    fn play<'a>(&mut self, word: &'a str, start: (i32, i32), direction_down: bool, dict: &HashSet<String>) -> Result<Action, String> {
+    pub fn play(&mut self, word: &str, start: (i32, i32), direction_down: bool, dict: &HashSet<String>) -> Result<Action, String> {
         let mut word = Word::new(word.to_owned(), start, direction_down);
         utils::word::extend_word(&self.board, &mut word);
 

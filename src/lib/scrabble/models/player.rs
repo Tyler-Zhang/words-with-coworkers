@@ -6,8 +6,12 @@ pub struct Player {
 }
 
 impl Player {
-    pub fn new(pieces: String) -> Self {
-        Player{ pieces, score: 0 }
+    pub fn new(pieces: &str) -> Self {
+        Player { pieces: pieces.to_string(), score: 0 }
+    }
+
+    pub fn hydrate(pieces: &str, score: i32) -> Self {
+        Player { pieces: pieces.to_string(), score }
     }
 
     pub fn remove_pieces(&mut self, pieces: &str) -> Result<(), String> {
@@ -29,14 +33,14 @@ mod tests {
 
     #[test]
     fn test_remove_pieces() {
-        let mut player = Player::new(format!("ABCDEFGH"));
+        let mut player = Player::new("ABCDEFGH");
         assert_eq!(player.remove_pieces("ABDG").is_ok(), true);
         assert_eq!(player.pieces, "CEFH");
     }
 
     #[test]
     fn test_failed_remove_pieces() {
-        let mut player = Player::new(format!("ABCDEFGH"));
+        let mut player = Player::new("ABCDEFGH");
         assert_eq!(player.remove_pieces("ABCIJK").is_err(), true);
         assert_eq!(player.pieces, "ABCDEFGH");
     }

@@ -37,7 +37,7 @@ Path or URL of Emoji yaml file: ./emojis.yml
 
 ### 2. Install the bot on your workspace
 
-- Goto [https://api.slack.com/apps](https://api.slack.com/apps) and log in to your workspace
+- Goto [https\:\/\/api.slack.com\/apps](https://api.slack.com/apps) and log in to your workspace
 - Press Create New App
 - Set **App Name** to **Words With Coworkers** and **Development Slack Workspace** to your workspace
 - Go to Create New Command in the left hand side navigator And input the following values:
@@ -45,6 +45,7 @@ Path or URL of Emoji yaml file: ./emojis.yml
   - **Request URL**: https://words-with-coworkers.herokuapp.com/slack
   - **Short Description**: Anything you want!
   - **Usage Hint**: help
+  - Check "Escape channels, users and links"
 
 ![](https://i.imgur.com/1TLMxWV.png)
 

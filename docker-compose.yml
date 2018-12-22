@@ -1,0 +1,12 @@
+version: '3'
+services:
+  db:
+    image: 'postgres:latest'
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./volumes/db:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: words_with_coworkers

@@ -1,5 +1,5 @@
+use super::constants;
 use super::models::{Board, BoardCell, Game, Player, Tile, TileBag};
-use rand::prelude::*;
 
 /**
  * This macro is used to add some syntactic sugar to when we're pushing
@@ -63,9 +63,12 @@ fn starting_tiles() -> Vec<Tile> {
 }
 
 fn create_tile_bag() -> TileBag {
-  let mut tiles = starting_tiles();
-  tiles.shuffle(&mut thread_rng());
-  TileBag { tiles: tiles }
+  let mut tile_bag = TileBag {
+    tiles: starting_tiles(),
+  };
+  tile_bag.shuffle();
+
+  tile_bag
 }
 
 /*
@@ -77,30 +80,27 @@ fn create_tile_bag() -> TileBag {
     # - Triple letter
     + - Starting spot
 */
-fn default_board() -> String {
-  "\
-   3..@...3...@..3\
-   .2...#...#...2.\
-   ..2...@.@...2..\
-   @..2...@...2..@\
-   ....2.....2....\
-   .#...#...#...#.\
-   ..@...@.@...@..\
-   3..@...+...@..3\
-   ..@...@.@...@..\
-   .#...#...#...#.\
-   ....2.....2....\
-   @..2...@...2..@\
-   ..2...@.@...2..\
-   .2...#...#...2.\
-   3..@...3...@..3"
-    .to_string()
-}
-
 fn create_board() -> Board {
+  let board = "\
+               3..@...3...@..3\
+               .2...#...#...2.\
+               ..2...@.@...2..\
+               @..2...@...2..@\
+               ....2.....2....\
+               .#...#...#...#.\
+               ..@...@.@...@..\
+               3..@...+...@..3\
+               ..@...@.@...@..\
+               .#...#...#...#.\
+               ....2.....2....\
+               @..2...@...2..@\
+               ..2...@.@...2..\
+               .2...#...#...2.\
+               3..@...3...@..3";
+
   let mut cells = Vec::new();
 
-  for c in default_board().chars() {
+  for c in board.chars() {
     cells.push(match c {
       '.' => BoardCell::Empty,
       '3' => BoardCell::TripleWord,
@@ -118,7 +118,7 @@ fn create_board() -> Board {
 fn create_player(tile_bag: &mut TileBag) -> Player {
   Player {
     score: 0,
-    hand: Vec::new(),
+    hand: tile_bag.draw(constants::HAND_SIZE).unwrap(),
   }
 }
 
@@ -157,5 +157,13 @@ mod tests {
   #[test]
   fn tile_bag_different() {
     assert_ne!(create_game(1).tile_bag.tiles, create_game(1).tile_bag.tiles);
+  }
+
+  #[test]
+  fn hand_size() {
+    let game = create_game(2);
+
+    assert_eq!(game.players[0].hand.len(), constants::HAND_SIZE as usize);
+    assert_eq!(game.players[1].hand.len(), constants::HAND_SIZE as usize);
   }
 }

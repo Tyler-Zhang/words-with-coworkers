@@ -1,16 +1,16 @@
 use std::collections::HashSet;
 use std::str;
 
-pub static HAND_SIZE: u32 = 10;
+
+pub static HAND_SIZE: usize = 10;
 
 lazy_static! {
   pub static ref DICTIONARY: HashSet<&'static str> = {
     let mut dict = HashSet::new();
 
-    let dictionary_bytes = include_bytes!("dictionary.txt");
-    let s = str::from_utf8(dictionary_bytes).unwrap();
+    let words = include_str!("dictionary.txt");
 
-    for line in s.lines() {
+    for line in words.lines() {
       dict.insert(line);
     }
 

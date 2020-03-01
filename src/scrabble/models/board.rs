@@ -77,7 +77,6 @@ static BOARD: &'static str = "\
 
 impl Board {
   pub fn new() -> Board {
-
     let mut cells = Vec::new();
 
     for c in BOARD.chars() {

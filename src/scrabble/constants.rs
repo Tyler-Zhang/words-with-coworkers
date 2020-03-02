@@ -1,7 +1,6 @@
 use std::collections::HashSet;
 use std::str;
 
-
 pub static HAND_SIZE: usize = 10;
 
 lazy_static! {

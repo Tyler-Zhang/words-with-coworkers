@@ -52,6 +52,16 @@ impl Tile {
   }
 }
 
+impl From<char> for Tile {
+  fn from(c: char) -> Tile {
+    match c {
+      ' ' => Tile::Blank,
+      c if ('A'..='Z').contains(&c) => Tile::Letter(c),
+      c => unreachable!("Trying to make a tile with character {}", c),
+    }
+  }
+}
+
 pub struct NotEnoughTilesError;
 
 impl fmt::Debug for NotEnoughTilesError {
@@ -106,7 +116,7 @@ impl TileBag {
       'Z' * 1
     }
 
-    let mut tile_bag = TileBag {tiles};
+    let mut tile_bag = TileBag { tiles };
     tile_bag.shuffle();
 
     tile_bag
@@ -128,7 +138,7 @@ impl TileBag {
     if count <= self.tiles.len() {
       Ok(self.tiles.drain(0..count).collect())
     } else {
-      Err(NotEnoughTilesError{})
+      Err(NotEnoughTilesError {})
     }
   }
 

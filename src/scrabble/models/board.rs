@@ -125,7 +125,7 @@ impl<'a> BoardWithOverlay<'a> {
 
         let mut mask = Vec::<Option<BoardCell>>::with_capacity(strip.len as usize);
 
-        for (i, curr_letter) in word.chars().enumerate() {
+        for curr_letter in word.chars() {
             let board_cell = board.get(curr_point.x as u32, curr_point.y as u32).ok_or(
                 Error::BadAction(format!("This placement goes off of the board!"))
             )?;

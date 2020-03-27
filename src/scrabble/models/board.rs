@@ -1,23 +1,24 @@
+use super::super::constants::{BOARD, BOARD_SIZE};
 use super::super::error::{Error, Result};
 use super::tile::Tile;
-use super::{Direction, Point};
+use super::{Direction, Point, Strip};
 
 /**
  * Represents how the cell on the board affects the scoring of the final word
  */
 #[derive(Debug, PartialEq)]
 pub struct BoardCellMultiplier {
-  word: u32,
-  letter: u32,
+    word: u32,
+    letter: u32,
 }
 
 impl BoardCellMultiplier {
-  pub fn new(word: u32, letter: u32) -> Self {
-    BoardCellMultiplier {
-      word: word,
-      letter: letter,
+    pub fn new(word: u32, letter: u32) -> Self {
+        BoardCellMultiplier {
+            word: word,
+            letter: letter,
+        }
     }
-  }
 }
 
 /**
@@ -25,204 +26,298 @@ impl BoardCellMultiplier {
  */
 #[derive(Debug, PartialEq)]
 pub enum BoardCell {
-  StartingSpot,
-  Empty,
-  DoubleLetter,
-  TripleLetter,
-  DoubleWord,
-  TripleWord,
-  Tile(Tile),
+    StartingSpot,
+    Empty,
+    DoubleLetter,
+    TripleLetter,
+    DoubleWord,
+    TripleWord,
+    Tile(Tile),
 }
 
 impl BoardCell {
-  pub fn get_multiplier(&self) -> BoardCellMultiplier {
-    match self {
-      Self::DoubleLetter => BoardCellMultiplier::new(1, 2),
-      Self::TripleLetter => BoardCellMultiplier::new(1, 3),
-      Self::DoubleWord => BoardCellMultiplier::new(2, 1),
-      Self::TripleWord => BoardCellMultiplier::new(3, 1),
-      _ => BoardCellMultiplier::new(1, 1),
+    pub fn get_multiplier(&self) -> BoardCellMultiplier {
+        match self {
+            Self::DoubleLetter => BoardCellMultiplier::new(1, 2),
+            Self::TripleLetter => BoardCellMultiplier::new(1, 3),
+            Self::DoubleWord => BoardCellMultiplier::new(2, 1),
+            Self::TripleWord => BoardCellMultiplier::new(3, 1),
+            _ => BoardCellMultiplier::new(1, 1),
+        }
     }
-  }
+}
+
+/**
+ * Trait defines basic operations that can be performed on a board
+ */
+trait ReadableBoard {
+    fn is_in_bounds(&self, x: u32, y: u32) -> bool;
+    fn get(&self, x: u32, y: u32) -> Option<&BoardCell>;
+}
+
+#[inline]
+fn xy_to_idx(width: u32, x: u32, y: u32) -> usize {
+    (y * width + x) as usize
 }
 
 #[derive(Debug)]
 pub struct Board {
-  pub cells: Vec<BoardCell>,
+    pub cells: Vec<BoardCell>,
 }
 
-/*
-  The Map of the default board
-    . - Empty piece
-    3 - Triple word
-    2 - Double word
-    @ - Double letter
-    # - Triple letter
-    + - Starting spot
-*/
-static BOARD: &'static str = "\
-  3..@...3...@..3\
-  .2...#...#...2.\
-  ..2...@.@...2..\
-  @..2...@...2..@\
-  ....2.....2....\
-  .#...#...#...#.\
-  ..@...@.@...@..\
-  3..@...+...@..3\
-  ..@...@.@...@..\
-  .#...#...#...#.\
-  ....2.....2....\
-  @..2...@...2..@\
-  ..2...@.@...2..\
-  .2...#...#...2.\
-  3..@...3...@..3";
+impl ReadableBoard for Board {
+    #[inline]
+    fn is_in_bounds(&self, x: u32, y: u32) -> bool {
+        (0..BOARD_SIZE).contains(&x) && (0..BOARD_SIZE).contains(&y)
+    }
 
-static BOARD_SIZE: u32 = 15;
+    fn get(&self, x: u32, y: u32) -> Option<&BoardCell> {
+        if !self.is_in_bounds(x, y) {
+            return None;
+        }
+
+        self.cells.get(xy_to_idx(BOARD_SIZE, x, y))
+    }
+}
 
 impl Board {
-  pub fn new() -> Board {
-    let mut cells = Vec::with_capacity((BOARD_SIZE * BOARD_SIZE) as usize);
+    pub fn new() -> Board {
+        let mut cells = Vec::with_capacity((BOARD_SIZE * BOARD_SIZE) as usize);
 
-    for c in BOARD.chars() {
-      cells.push(match c {
-        '.' => BoardCell::Empty,
-        '3' => BoardCell::TripleWord,
-        '2' => BoardCell::DoubleWord,
-        '@' => BoardCell::DoubleLetter,
-        '#' => BoardCell::TripleLetter,
-        '+' => BoardCell::StartingSpot,
-        _ => unreachable!("Tried to parse invalid character for board"),
-      })
-    }
-
-    Board { cells }
-  }
-
-  #[inline]
-  pub fn is_in_bounds(&self, x: u32, y: u32) -> bool {
-    (0..BOARD_SIZE).contains(&x) && (0..BOARD_SIZE).contains(&y)
-  }
-
-  pub fn at(&self, x: u32, y: u32) -> Option<&BoardCell> {
-    if !self.is_in_bounds(x, y) {
-      return None;
-    }
-
-    self.cells.get((y * BOARD_SIZE + x) as usize)
-  }
-
-  pub fn set(&mut self, x: u32, y: u32, bc: BoardCell) -> Result<()> {
-    if !self.is_in_bounds(x, y) {
-      return Err(Error::BadAction(format!("Out of bounds")).into());
-    }
-    self.cells[(y * BOARD_SIZE + x) as usize] = bc;
-    Ok(())
-  }
-
-  /**
-   * Allows us to easily iterate over a line of the board
-   *
-   * The iterator function can control if it want's to continue iterator
-   * by returning a result. An Err will immediately end the iteration
-   */
-  pub fn for_each(
-    &self,
-    start: &Point,
-    direction: &Direction,
-    len: u32,
-    f: &dyn Fn(&Point, &BoardCell) -> std::result::Result<(), ()>,
-  ) {
-    let mut loc = (*start).clone();
-
-    for _ in 0..len {
-      if let Some(bc) = self.at(loc.x, loc.y) {
-        if let Err(_) = f(&loc, bc) {
-          return;
+        for c in BOARD.chars() {
+            cells.push(match c {
+                '.' => BoardCell::Empty,
+                '3' => BoardCell::TripleWord,
+                '2' => BoardCell::DoubleWord,
+                '@' => BoardCell::DoubleLetter,
+                '#' => BoardCell::TripleLetter,
+                '+' => BoardCell::StartingSpot,
+                _ => unreachable!("Tried to parse invalid character for board"),
+            })
         }
-      } else {
-        return;
-      }
 
-      loc += direction;
+        Board { cells }
     }
-  }
 
-  pub fn get_pieces_needed_for_place(
-    &self,
-    start: &Point,
-    direction: &Direction,
-    word: &str,
-  ) -> Result<Vec<Tile>> {
-    let mut needed_tiles = Vec::<Tile>::new();
-
-    let mut loc = (*start).clone();
-
-    for c in word.chars() {
-      if let Some(&BoardCell::Tile(Tile::Letter(letter))) = self.at(loc.x, loc.y) {
-        if letter != c {
-          return Err(Error::BadAction(format!("This word cannot be placed")).into());
+    fn set(&mut self, x: u32, y: u32, bc: BoardCell) -> Result<()> {
+        if !self.is_in_bounds(x, y) {
+            return Err(Error::BadAction(format!("Out of bounds")).into());
         }
-      } else {
-        needed_tiles.push(Tile::Letter(c));
-      }
+        self.cells[xy_to_idx(BOARD_SIZE, x, y)] = bc;
+        Ok(())
+    }
+}
 
-      loc += direction;
+/**
+ * A decorator for a Board that places an "uncommitted" line of pieces above
+ * a line on the original board
+ */
+pub struct BoardWithOverlay<'a> {
+    board: Board,
+    strip: Strip,
+    word: &'a str,
+    board_cells: Vec<Option<BoardCell>>,
+}
+
+impl<'a> BoardWithOverlay<'a> {
+    fn get_overlay_mask(board: &Board, strip: &Strip, word: &str) -> Result<Vec<Option<BoardCell>>> {
+        let mut curr_point = strip.start.clone();
+
+        let mut mask = Vec::<Option<BoardCell>>::with_capacity(strip.len as usize);
+
+        for (i, curr_letter) in word.chars().enumerate() {
+            let board_cell = board.get(curr_point.x as u32, curr_point.y as u32).ok_or(
+                Error::BadAction(format!("This placement goes off of the board!"))
+            )?;
+
+            match board_cell {
+                BoardCell::Tile(Tile::Letter(letter)) =>
+                    if letter == &curr_letter {
+                        mask.push(None);
+                    } else {
+                        return Err(Error::BadAction(format!("Pieces do not fit")).into());
+                    },
+                _ => mask.push(Some(BoardCell::Tile(Tile::Letter(curr_letter))))
+            }
+
+            curr_point += &strip.dir;
+        }
+
+        Ok(mask)
     }
 
-    Ok(needed_tiles)
-  }
+    pub fn try_overlay<'b>(
+        board: Board,
+        point: Point,
+        dir: Direction,
+        word: &'b str,
+    ) -> Result<BoardWithOverlay<'b>> {
+        let strip = Strip::new(point, dir, word.len() as i32);
+
+        let overlay_mask = Self::get_overlay_mask(&board, &strip, word)?;
+
+        let bwo = BoardWithOverlay {
+            board,
+            strip,
+            word,
+            board_cells: overlay_mask
+        };
+
+        Ok(bwo)
+    }
+
+    pub fn get_overlaid_letters(&self) -> Vec<Tile> {
+        self.board_cells.iter()
+            .filter(|w| w.is_some())
+            .map(|w| {
+                match w {
+                    &Some(BoardCell::Tile(tile)) => tile,
+                    _ => unreachable!()
+                }
+            })
+            .collect()
+    }
+}
+impl<'a> ReadableBoard for BoardWithOverlay<'a> {
+    fn is_in_bounds(&self, x: u32, y: u32) -> bool {
+        self.board.is_in_bounds(x, y)
+    }
+
+    fn get(&self, x: u32, y: u32) -> Option<&BoardCell> {
+        if !self.is_in_bounds(x, y) {
+            return None;
+        }
+
+        if !self.strip.contains(&Point::new(x as i32, y as i32)) {
+            // This piece is not being overlayed on
+            return self.board.get(x, y);
+        }
+
+        // Get distance from required piece to the start of the strip
+        let distance = (x as i32 - self.strip.start.x as i32).abs() +
+                       (y as i32 - self.strip.start.y as i32).abs();
+
+        // If we are looking at a cell that is actually being overlayed,
+        // and not just a part of the strip, then we return the cell
+        // otherwise, we return the underlying piece
+        if let Some(ref cell) = self.board_cells[distance as usize] {
+            return Some(cell);
+        } else {
+            return self.board.get(x, y);
+        }
+    }
+}
+
+impl dyn ReadableBoard {
+    /**
+     * Allows us to easily iterate over a line of the board
+     *
+     * The iterator function can control if it want's to continue iterator
+     * by returning a result. An Err will immediately end the iteration
+     */
+    pub fn for_each(
+        &self,
+        strip: &Strip,
+        f: &dyn Fn(&Point, &BoardCell) -> bool,
+    ) {
+        let mut loc = (strip.start).clone();
+
+        for _ in 0..strip.len {
+            if let Some(bc) = self.get(loc.x as u32, loc.y as u32) {
+                if !f(&loc, bc) {
+                    return;
+                }
+            } else {
+                return;
+            }
+
+            loc += &strip.dir;
+        }
+    }
 }
 
 #[cfg(test)]
 mod tests {
-  use super::*;
+    use super::*;
 
-  #[test]
-  fn at_no_tile_test() {
-    let board = Board::new();
+    #[test]
+    fn at_no_tile_test() {
+        let board = Board::new();
 
-    assert_eq!(board.at(0, 0).unwrap(), &BoardCell::TripleWord);
-    assert_eq!(board.at(3, 0).unwrap(), &BoardCell::DoubleLetter);
-    assert_eq!(board.at(1, 1).unwrap(), &BoardCell::DoubleWord);
-    assert_eq!(board.at(7, 7).unwrap(), &BoardCell::StartingSpot);
-    assert_eq!(board.at(BOARD_SIZE, BOARD_SIZE), None);
-  }
+        assert_eq!(board.get(0, 0).unwrap(), &BoardCell::TripleWord);
+        assert_eq!(board.get(3, 0).unwrap(), &BoardCell::DoubleLetter);
+        assert_eq!(board.get(1, 1).unwrap(), &BoardCell::DoubleWord);
+        assert_eq!(board.get(7, 7).unwrap(), &BoardCell::StartingSpot);
+        assert_eq!(board.get(BOARD_SIZE, BOARD_SIZE), None);
+    }
 
-  #[test]
-  fn set_and_get_tiles() {
-    let mut board = Board::new();
+    #[test]
+    fn set_and_get_tiles() {
+        let mut board = Board::new();
 
-    assert_eq!(
-      board.set(0, 0, BoardCell::Tile(Tile::Letter('A'))).is_ok(),
-      true
-    );
-    assert_eq!(board.at(0, 0).unwrap(), &BoardCell::Tile(Tile::Letter('A')));
+        assert_eq!(
+            board.set(0, 0, BoardCell::Tile(Tile::Letter('A'))).is_ok(),
+            true
+        );
+        assert_eq!(board.get(0, 0).unwrap(), &BoardCell::Tile(Tile::Letter('A')));
 
-    assert_eq!(
-      board.set(BOARD_SIZE, BOARD_SIZE, BoardCell::Empty).is_err(),
-      true
-    );
-  }
+        assert_eq!(
+            board.set(BOARD_SIZE, BOARD_SIZE, BoardCell::Empty).is_err(),
+            true
+        );
+    }
 
-  #[test]
-  fn pieces_for_place() {
-    let mut board = Board::new();
+    #[test]
+    fn pieces_for_place() {
+        let mut board = Board::new();
+        let mut board_with_overlay = BoardWithOverlay::try_overlay(
+            board,
+            Point::new(0,0),
+            Direction::new(1, 0),
+            "HI"
+        ).unwrap();
 
-    assert_eq!(
-      board
-        .get_pieces_needed_for_place(&Point::new(0, 0), &Direction::new(1, 0), "HI")
-        .unwrap(),
-      vec![Tile::Letter('H'), Tile::Letter('I')]
-    );
+        assert_eq!(
+            board_with_overlay.get_overlaid_letters(),
+            vec![Tile::Letter('H'), Tile::Letter('I')]
+        );
 
-    board.set(1, 0, BoardCell::Tile(Tile::Letter('E'))).unwrap();
-    board.set(3, 0, BoardCell::Tile(Tile::Letter('L'))).unwrap();
+        board = Board::new();
+        board.set(1, 0, BoardCell::Tile(Tile::Letter('E'))).unwrap();
+        board.set(3, 0, BoardCell::Tile(Tile::Letter('L'))).unwrap();
+        board_with_overlay = BoardWithOverlay::try_overlay(
+            board,
+            Point::new(0, 0),
+            Direction::new(1, 0),
+            "HELLO"
+        ).unwrap();
 
-    assert_eq!(
-      board
-        .get_pieces_needed_for_place(&Point::new(0, 0), &Direction::new(1, 0), "HELLO")
-        .unwrap(),
-      vec![Tile::Letter('H'), Tile::Letter('L'), Tile::Letter('O')]
-    );
-  }
+        assert_eq!(
+            board_with_overlay.get_overlaid_letters(),
+            vec![Tile::Letter('H'), Tile::Letter('L'), Tile::Letter('O')]
+        );
+    }
+
+    #[test]
+    fn pieces_for_place_err() {
+        let mut board = Board::new();
+        let mut board_with_overlay = BoardWithOverlay::try_overlay(
+            board,
+            Point::new(0, 0),
+            Direction::new(1, 0),
+            "REALLY LONG WORD THAT OVERFLOWS THE ENTIRE BOARD"
+        );
+
+        assert_eq!(board_with_overlay.is_err(), true);
+
+        board = Board::new();
+        board_with_overlay = BoardWithOverlay::try_overlay(
+            board,
+            Point::new(10, 0),
+            Direction::new(1, 0),
+            "LONGWORD"
+        );
+
+        assert_eq!(board_with_overlay.is_err(), true);
+    }
 }

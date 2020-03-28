@@ -1,5 +1,10 @@
 use std::ops;
 
+pub static DIRECTION_DOWN: Direction = Direction::new(0, 1);
+pub static DIRECTION_RIGHT: Direction = Direction::new(1, 0);
+pub static DIRECTION_LEFT: Direction = Direction::new(-1, 0);
+pub static DIRECTION_UP: Direction = Direction::new(0, -1);
+
 #[derive(Clone, Copy, PartialEq, PartialOrd)]
 pub struct Point {
     pub x: i32,
@@ -39,6 +44,14 @@ pub struct Direction {
 impl Direction {
     pub fn new(x: i32, y: i32) -> Direction {
         Direction { x, y }
+    }
+
+    pub fn is_horizontal(&self) -> bool {
+        self.x != 0
+    }
+
+    pub fn is_vertical(&self) -> bool {
+        self.y != 0
     }
 }
 

@@ -1,7 +1,7 @@
 use super::super::constants::{BOARD, BOARD_SIZE};
 use super::super::error::{Error, Result};
 use super::tile::Tile;
-use super::{Direction, Point, Strip};
+use super::{Direction, Point, Strip, DIRECTION_RIGHT, DIRECTION_DOWN};
 
 /**
  * Represents how the cell on the board affects the scoring of the final word
@@ -24,7 +24,7 @@ impl BoardCellMultiplier {
 /**
  * Represents the state of a cell on the board
  */
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum BoardCell {
     StartingSpot,
     Empty,
@@ -119,6 +119,8 @@ pub struct BoardWithOverlay<'a> {
     board_cells: Vec<Option<BoardCell>>,
 }
 
+type OverlaidWord = Vec<(BoardCell, Option<BoardCell>)>;
+
 impl<'a> BoardWithOverlay<'a> {
     fn get_overlay_mask(board: &Board, strip: &Strip, word: &str) -> Result<Vec<Option<BoardCell>>> {
         let mut curr_point = strip.start.clone();
@@ -177,48 +179,54 @@ impl<'a> BoardWithOverlay<'a> {
             })
             .collect()
     }
-}
-impl<'a> ReadableBoard for BoardWithOverlay<'a> {
-    fn is_in_bounds(&self, x: u32, y: u32) -> bool {
-        self.board.is_in_bounds(x, y)
-    }
 
-    fn get(&self, x: u32, y: u32) -> Option<&BoardCell> {
-        if !self.is_in_bounds(x, y) {
+    fn get_overlay_at(&self, point: Point) -> Option<&BoardCell> {
+        if !self.strip.contains(&point) {
             return None;
         }
 
-        if !self.strip.contains(&Point::new(x as i32, y as i32)) {
-            // This piece is not being overlayed on
-            return self.board.get(x, y);
-        }
-
         // Get distance from required piece to the start of the strip
-        let distance = (x as i32 - self.strip.start.x as i32).abs() +
-                       (y as i32 - self.strip.start.y as i32).abs();
+        let distance = (point.x as i32 - self.strip.start.x as i32).abs() +
+                       (point.y as i32 - self.strip.start.y as i32).abs();
 
-        // If we are looking at a cell that is actually being overlayed,
-        // and not just a part of the strip, then we return the cell
-        // otherwise, we return the underlying piece
-        if let Some(ref cell) = self.board_cells[distance as usize] {
-            return Some(cell);
-        } else {
-            return self.board.get(x, y);
-        }
+        self.board_cells[distance as usize].as_ref()
     }
-}
 
-impl dyn ReadableBoard {
+    fn is_point_covered(&self, point: Point) -> bool {
+        self.get_overlay_at(point).is_some()
+    }
+
     /**
      * Allows us to easily iterate over a line of the board
      *
      * The iterator function can control if it want's to continue iterator
      * by returning a result. An Err will immediately end the iteration
      */
-    pub fn for_each(
+    fn for_each_until(
+        &self,
+        start: Point,
+        dir: Direction,
+        f: &mut dyn FnMut(&Point, &BoardCell) -> bool,
+    ) {
+        let mut loc = (start).clone();
+
+        loop {
+            if let Some(bc) = self.get(loc.x as u32, loc.y as u32) {
+                if !f(&loc, bc) {
+                    return;
+                }
+            } else {
+                return;
+            }
+
+            loc += &dir;
+        }
+    }
+
+    fn for_each(
         &self,
         strip: &Strip,
-        f: &dyn Fn(&Point, &BoardCell) -> bool,
+        f: &mut dyn FnMut(&Point, &BoardCell) -> bool,
     ) {
         let mut loc = (strip.start).clone();
 
@@ -232,6 +240,104 @@ impl dyn ReadableBoard {
             }
 
             loc += &strip.dir;
+        }
+    }
+
+    /// Returns a vector tuple. The first element stores the flattened tile
+    /// (i.e which ever tile .get returns) where as the second element
+    /// stores the tile underneath if the first is an overlaid tile
+    pub fn get_connecting_letters_from(&self, start: Point, dir: Direction) -> Vec<(BoardCell, Option<BoardCell>)> {
+        let mut accum_vec = Vec::<(BoardCell, Option<BoardCell>)>::new();
+
+        self.for_each_until(
+            start,
+            dir,
+            &mut |point, board_cell| {
+                match board_cell {
+                    &BoardCell::Tile(_) => {
+                        accum_vec.push((
+                            (*board_cell).clone(),
+                            if self.strip.contains(point) {
+                                Some((*self.board.get(point.x as u32, point.y as u32).unwrap()).clone())
+                            } else {
+                                None
+                            })
+                        );
+                        true
+                    }
+                    _ => false
+                }
+            }
+        );
+
+        accum_vec
+    }
+
+    pub fn get_whole_word(&self, start: Point, dir: Direction) -> OverlaidWord {
+        let mut word = Vec::new();
+
+        let mut opposite_dir = self.get_connecting_letters_from(start + (dir * -1), dir * -1);
+        opposite_dir.reverse();
+
+        word.append(&mut opposite_dir);
+        word.append(&mut self.get_connecting_letters_from(start, dir));
+
+        word
+    }
+
+    pub fn get_formed_words(&self) -> (OverlaidWord, Vec<OverlaidWord>){
+        let main_line_word = self.get_whole_word(self.strip.start, self.strip.dir);
+
+        let mut branching_words = Vec::new();
+
+        let perp_direction = if self.strip.dir.is_horizontal() {
+            DIRECTION_DOWN
+        } else {
+            DIRECTION_RIGHT
+        };
+
+        self.for_each(
+            &self.strip,
+            &mut |point, _| {
+                if self.is_point_covered(*point) {
+                    let word = self.get_whole_word(*point, perp_direction);
+
+                    if word.len() > 1 {
+                        branching_words.push(word)
+                    }
+                }
+                true
+            }
+        );
+
+        (main_line_word, branching_words)
+    }
+}
+
+impl<'a> ReadableBoard for BoardWithOverlay<'a> {
+    fn is_in_bounds(&self, x: u32, y: u32) -> bool {
+        self.board.is_in_bounds(x, y)
+    }
+
+    fn get(&self, x: u32, y: u32) -> Option<&BoardCell> {
+        let point = Point::new(x as i32, y as i32);
+
+        if !self.is_in_bounds(x, y) {
+            return None;
+        }
+
+        if !self.strip.contains(&point) {
+            // This piece is not being overlayed on
+            return self.board.get(x, y);
+        }
+
+        // If we are looking at a cell that is actually being overlayed,
+        // and not just a part of the strip, then we return the cell
+        // otherwise, we return the underlying piece
+        if let Some(ref cell) = self.get_overlay_at(point) {
+            return Some(cell);
+        } else {
+            return self.board.get(x, y);
         }
     }
 }

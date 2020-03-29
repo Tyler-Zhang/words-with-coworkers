@@ -51,13 +51,13 @@ impl BoardCell {
  * Trait defines basic operations that can be performed on a board
  */
 trait ReadableBoard {
-    fn is_in_bounds(&self, x: u32, y: u32) -> bool;
-    fn get(&self, x: u32, y: u32) -> Option<&BoardCell>;
+    fn is_in_bounds(&self, point: &Point) -> bool;
+    fn get(&self, point: &Point) -> Option<&BoardCell>;
 }
 
 #[inline]
-fn xy_to_idx(width: u32, x: u32, y: u32) -> usize {
-    (y * width + x) as usize
+fn xy_to_idx(width: u32, point: &Point) -> usize {
+    (point.y * width as i32 + point.x) as usize
 }
 
 #[derive(Debug)]
@@ -67,16 +67,16 @@ pub struct Board {
 
 impl ReadableBoard for Board {
     #[inline]
-    fn is_in_bounds(&self, x: u32, y: u32) -> bool {
-        (0..BOARD_SIZE).contains(&x) && (0..BOARD_SIZE).contains(&y)
+    fn is_in_bounds(&self, point: &Point) -> bool {
+        (0..BOARD_SIZE).contains(&(point.x as u32)) && (0..BOARD_SIZE).contains(&(point.y as u32))
     }
 
-    fn get(&self, x: u32, y: u32) -> Option<&BoardCell> {
-        if !self.is_in_bounds(x, y) {
+    fn get(&self, point: &Point) -> Option<&BoardCell> {
+        if !self.is_in_bounds(point) {
             return None;
         }
 
-        self.cells.get(xy_to_idx(BOARD_SIZE, x, y))
+        self.cells.get(xy_to_idx(BOARD_SIZE, point))
     }
 }
 
@@ -99,20 +99,20 @@ impl Board {
         Board { cells }
     }
 
-    fn set(&mut self, x: u32, y: u32, bc: BoardCell) -> Result<()> {
-        if !self.is_in_bounds(x, y) {
+    fn set(&mut self, point: &Point, bc: BoardCell) -> Result<()> {
+        if !self.is_in_bounds(point) {
             return Err(Error::BadAction(format!("Out of bounds")).into());
         }
-        self.cells[xy_to_idx(BOARD_SIZE, x, y)] = bc;
+        self.cells[xy_to_idx(BOARD_SIZE, point)] = bc;
         Ok(())
     }
 
-    fn get_mut(&mut self, x: u32, y: u32) -> Option<&mut BoardCell> {
-        if !self.is_in_bounds(x, y) {
+    fn get_mut(&mut self, point: &Point) -> Option<&mut BoardCell> {
+        if !self.is_in_bounds(point) {
             return None;
         }
 
-        self.cells.get_mut(xy_to_idx(BOARD_SIZE, x, y))
+        self.cells.get_mut(xy_to_idx(BOARD_SIZE, point))
     }
 
     fn for_each_mut(
@@ -123,7 +123,7 @@ impl Board {
         let mut loc = (strip.start).clone();
 
         for _ in 0..strip.len {
-            if let Some(bc) = self.get_mut(loc.x as u32, loc.y as u32) {
+            if let Some(bc) = self.get_mut(&loc) {
                 if !f(&loc, bc) {
                     return;
                 }
@@ -156,7 +156,7 @@ impl<'a> BoardWithOverlay<'a> {
         let mut mask = Vec::<Option<BoardCell>>::with_capacity(strip.len as usize);
 
         for curr_letter in word.chars() {
-            let board_cell = board.get(curr_point.x as u32, curr_point.y as u32).ok_or(
+            let board_cell = board.get(&curr_point).ok_or(
                 Error::BadAction(format!("This placement goes off of the board!"))
             )?;
 
@@ -208,13 +208,13 @@ impl<'a> BoardWithOverlay<'a> {
             .collect()
     }
 
-    fn get_overlay_at(&self, point: Point) -> Option<&BoardCell> {
+    fn get_overlay_at(&self, point: &Point) -> Option<&BoardCell> {
         let dist_from_start = self.strip.distance_in(&point)?;
 
         self.board_cells[dist_from_start as usize].as_ref()
     }
 
-    fn is_point_covered(&self, point: Point) -> bool {
+    fn is_point_covered(&self, point: &Point) -> bool {
         self.get_overlay_at(point).is_some()
     }
 
@@ -233,7 +233,7 @@ impl<'a> BoardWithOverlay<'a> {
                         accum_vec.push((
                             (*board_cell).clone(),
                             if self.strip.contains(point) {
-                                Some((*self.board.get(point.x as u32, point.y as u32).unwrap()).clone())
+                                Some((*self.board.get(point).unwrap()).clone())
                             } else {
                                 None
                             })
@@ -248,7 +248,10 @@ impl<'a> BoardWithOverlay<'a> {
         accum_vec
     }
 
-    pub fn get_whole_word(&self, start: Point, dir: Direction) -> OverlaidWord {
+    pub fn get_whole_word(&self, start: &Point, dir: &Direction) -> OverlaidWord {
+        let mut start = *start;
+        let dir = *dir;
+
         let mut word = Vec::new();
 
         let mut opposite_dir = self.get_connecting_letters_from(start + (dir * -1), dir * -1);
@@ -261,7 +264,7 @@ impl<'a> BoardWithOverlay<'a> {
     }
 
     pub fn get_formed_words(&self) -> (OverlaidWord, Vec<OverlaidWord>){
-        let main_line_word = self.get_whole_word(self.strip.start, self.strip.dir);
+        let main_line_word = self.get_whole_word(&self.strip.start, &self.strip.dir);
 
         let mut branching_words = Vec::new();
 
@@ -274,8 +277,8 @@ impl<'a> BoardWithOverlay<'a> {
         self.for_each(
             &self.strip,
             &mut |point, _| {
-                if self.is_point_covered(*point) {
-                    let word = self.get_whole_word(*point, perp_direction);
+                if self.is_point_covered(point) {
+                    let word = self.get_whole_word(point, &perp_direction);
 
                     if word.len() > 1 {
                         branching_words.push(word)
@@ -305,20 +308,18 @@ impl<'a> BoardWithOverlay<'a> {
 }
 
 impl<'a> ReadableBoard for BoardWithOverlay<'a> {
-    fn is_in_bounds(&self, x: u32, y: u32) -> bool {
-        self.board.is_in_bounds(x, y)
+    fn is_in_bounds(&self, point: &Point) -> bool {
+        self.board.is_in_bounds(point)
     }
 
-    fn get(&self, x: u32, y: u32) -> Option<&BoardCell> {
-        let point = Point::new(x as i32, y as i32);
-
-        if !self.is_in_bounds(x, y) {
+    fn get(&self, point: &Point) -> Option<&BoardCell> {
+        if !self.is_in_bounds(point) {
             return None;
         }
 
         if !self.strip.contains(&point) {
             // This piece is not being overlayed on
-            return self.board.get(x, y);
+            return self.board.get(point);
         }
 
         // If we are looking at a cell that is actually being overlayed,
@@ -327,7 +328,7 @@ impl<'a> ReadableBoard for BoardWithOverlay<'a> {
         if let Some(ref cell) = self.get_overlay_at(point) {
             return Some(cell);
         } else {
-            return self.board.get(x, y);
+            return self.board.get(point);
         }
     }
 }
@@ -360,10 +361,10 @@ impl <T: ReadableBoard> IterableBoard for T {
         dir: Direction,
         f: &mut dyn FnMut(&Point, &BoardCell) -> bool,
     ) {
-        let mut loc = (start).clone();
+        let mut loc = start.clone();
 
         loop {
-            if let Some(bc) = self.get(loc.x as u32, loc.y as u32) {
+            if let Some(bc) = self.get(&loc) {
                 if !f(&loc, bc) {
                     return;
                 }
@@ -380,10 +381,10 @@ impl <T: ReadableBoard> IterableBoard for T {
         strip: &Strip,
         f: &mut dyn FnMut(&Point, &BoardCell) -> bool,
     ) {
-        let mut loc = (strip.start).clone();
+        let mut loc = strip.start.clone();
 
         for _ in 0..strip.len {
-            if let Some(bc) = self.get(loc.x as u32, loc.y as u32) {
+            if let Some(bc) = self.get(&loc) {
                 if !f(&loc, bc) {
                     return;
                 }
@@ -404,11 +405,11 @@ mod tests {
     fn at_no_tile_test() {
         let board = Board::new();
 
-        assert_eq!(board.get(0, 0).unwrap(), &BoardCell::TripleWord);
-        assert_eq!(board.get(3, 0).unwrap(), &BoardCell::DoubleLetter);
-        assert_eq!(board.get(1, 1).unwrap(), &BoardCell::DoubleWord);
-        assert_eq!(board.get(7, 7).unwrap(), &BoardCell::StartingSpot);
-        assert_eq!(board.get(BOARD_SIZE, BOARD_SIZE), None);
+        assert_eq!(board.get(&Point::new(0, 0)).unwrap(), &BoardCell::TripleWord);
+        assert_eq!(board.get(&Point::new(3, 0)).unwrap(), &BoardCell::DoubleLetter);
+        assert_eq!(board.get(&Point::new(1, 1)).unwrap(), &BoardCell::DoubleWord);
+        assert_eq!(board.get(&Point::new(7, 7)).unwrap(), &BoardCell::StartingSpot);
+        assert_eq!(board.get(&Point::new(BOARD_SIZE as i32, BOARD_SIZE as i32)), None);
     }
 
     #[test]
@@ -416,13 +417,13 @@ mod tests {
         let mut board = Board::new();
 
         assert_eq!(
-            board.set(0, 0, BoardCell::Tile(Tile::Letter('A'))).is_ok(),
+            board.set(&Point::new(0, 0), BoardCell::Tile(Tile::Letter('A'))).is_ok(),
             true
         );
-        assert_eq!(board.get(0, 0).unwrap(), &BoardCell::Tile(Tile::Letter('A')));
+        assert_eq!(board.get(&Point::new(0, 0)).unwrap(), &BoardCell::Tile(Tile::Letter('A')));
 
         assert_eq!(
-            board.set(BOARD_SIZE, BOARD_SIZE, BoardCell::Empty).is_err(),
+            board.set(&Point::new(BOARD_SIZE as i32, BOARD_SIZE as i32), BoardCell::Empty).is_err(),
             true
         );
     }
@@ -443,8 +444,8 @@ mod tests {
         );
 
         board = Board::new();
-        board.set(1, 0, BoardCell::Tile(Tile::Letter('E'))).unwrap();
-        board.set(3, 0, BoardCell::Tile(Tile::Letter('L'))).unwrap();
+        board.set(&Point::new(1, 0), BoardCell::Tile(Tile::Letter('E'))).unwrap();
+        board.set(&Point::new(3, 0), BoardCell::Tile(Tile::Letter('L'))).unwrap();
         board_with_overlay = BoardWithOverlay::try_overlay(
             board,
             Point::new(0, 0),
@@ -491,19 +492,19 @@ mod tests {
          * .E.K..
          */
         let mut board = Board::new();
-        board.set(1, 0, BoardCell::Tile(Tile::from('P')))?;
-        board.set(1, 1, BoardCell::Tile(Tile::from('R')))?;
-        // board.set(1, 2, BoardCell::Tile(Tile::from('I')))?;
-        board.set(1, 3, BoardCell::Tile(Tile::from('M')))?;
-        board.set(1, 4, BoardCell::Tile(Tile::from('E')))?;
+        board.set(&Point::new(1, 0), BoardCell::Tile(Tile::from('P')))?;
+        board.set(&Point::new(1, 1), BoardCell::Tile(Tile::from('R')))?;
+        // board.set(&Point::new(1, 2), BoardCell::Tile(Tile::from('I')))?;
+        board.set(&Point::new(1, 3), BoardCell::Tile(Tile::from('M')))?;
+        board.set(&Point::new(1, 4), BoardCell::Tile(Tile::from('E')))?;
 
-        board.set(3, 0, BoardCell::Tile(Tile::from('C')))?;
-        board.set(3, 1, BoardCell::Tile(Tile::from('R')))?;
-        // board.set(3, 2, BoardCell::Tile(Tile::from('E')))?;
-        board.set(3, 3, BoardCell::Tile(Tile::from('E')))?;
-        board.set(3, 4, BoardCell::Tile(Tile::from('K')))?;
+        board.set(&Point::new(3, 0), BoardCell::Tile(Tile::from('C')))?;
+        board.set(&Point::new(3, 1), BoardCell::Tile(Tile::from('R')))?;
+        // board.set(&Point::new(3, 2), BoardCell::Tile(Tile::from('E')))?;
+        board.set(&Point::new(3, 3), BoardCell::Tile(Tile::from('E')))?;
+        board.set(&Point::new(3, 4), BoardCell::Tile(Tile::from('K')))?;
 
-        board.set(4, 2, BoardCell::Tile(Tile::from('D')))?;
+        board.set(&Point::new(4, 2), BoardCell::Tile(Tile::from('D')))?;
 
         let board_overlay = BoardWithOverlay::try_overlay(
             board,
@@ -520,23 +521,23 @@ mod tests {
         let board = make_board_with_overlay()?;
 
         assert_eq!(
-            board.get_overlay_at(Point::new(0, 2)),
+            board.get_overlay_at(&Point::new(0, 2)),
             Some(&BoardCell::Tile(Tile::from('M')))
         );
 
         assert_eq!(
-            board.get_overlay_at(Point::new(1, 2)),
+            board.get_overlay_at(&Point::new(1, 2)),
             Some(&BoardCell::Tile(Tile::from('I')))
         );
 
         assert_eq!(
-            board.get_overlay_at(Point::new(3, 2)),
+            board.get_overlay_at(&Point::new(3, 2)),
             Some(&BoardCell::Tile(Tile::from('E')))
         );
 
-        assert_eq!(board.get_overlay_at(Point::new(0, 1)), None);
-        assert_eq!(board.get_overlay_at(Point::new(4, 3)), None);
-        assert_eq!(board.get_overlay_at(Point::new(2, 4)), None);
+        assert_eq!(board.get_overlay_at(&Point::new(0, 1)), None);
+        assert_eq!(board.get_overlay_at(&Point::new(4, 3)), None);
+        assert_eq!(board.get_overlay_at(&Point::new(2, 4)), None);
         Ok(())
     }
 
@@ -558,11 +559,11 @@ mod tests {
 
         let board = board_overlay.apply_to_board();
 
-        assert_eq!(board.get(0, 2).unwrap(), &BoardCell::Tile(Tile::from('M')));
-        assert_eq!(board.get(1, 2).unwrap(), &BoardCell::Tile(Tile::from('I')));
-        assert_eq!(board.get(2, 2).unwrap(), &BoardCell::Tile(Tile::from('N')));
-        assert_eq!(board.get(3, 2).unwrap(), &BoardCell::Tile(Tile::from('E')));
-        assert_eq!(board.get(4, 2).unwrap(), &BoardCell::Tile(Tile::from('D')));
+        assert_eq!(board.get(&Point::new(0, 2)).unwrap(), &BoardCell::Tile(Tile::from('M')));
+        assert_eq!(board.get(&Point::new(1, 2)).unwrap(), &BoardCell::Tile(Tile::from('I')));
+        assert_eq!(board.get(&Point::new(2, 2)).unwrap(), &BoardCell::Tile(Tile::from('N')));
+        assert_eq!(board.get(&Point::new(3, 2)).unwrap(), &BoardCell::Tile(Tile::from('E')));
+        assert_eq!(board.get(&Point::new(4, 2)).unwrap(), &BoardCell::Tile(Tile::from('D')));
 
         Ok(())
     }

@@ -1,7 +1,7 @@
 use super::super::constants::{BOARD, BOARD_SIZE};
 use super::super::error::{Error, Result};
 use super::tile::Tile;
-use super::{Direction, Point, Strip, DIRECTION_RIGHT, DIRECTION_DOWN};
+use super::{Direction, Point, Strip};
 
 /**
  * Represents how the cell on the board affects the scoring of the final word
@@ -106,6 +106,34 @@ impl Board {
         self.cells[xy_to_idx(BOARD_SIZE, x, y)] = bc;
         Ok(())
     }
+
+    fn get_mut(&mut self, x: u32, y: u32) -> Option<&mut BoardCell> {
+        if !self.is_in_bounds(x, y) {
+            return None;
+        }
+
+        self.cells.get_mut(xy_to_idx(BOARD_SIZE, x, y))
+    }
+
+    fn for_each_mut(
+        &mut self,
+        strip: &Strip,
+        f: &mut dyn FnMut(&Point, &mut BoardCell) -> bool,
+    ) {
+        let mut loc = (strip.start).clone();
+
+        for _ in 0..strip.len {
+            if let Some(bc) = self.get_mut(loc.x as u32, loc.y as u32) {
+                if !f(&loc, bc) {
+                    return;
+                }
+            } else {
+                return;
+            }
+
+            loc += &strip.dir;
+        }
+    }
 }
 
 /**
@@ -181,66 +209,13 @@ impl<'a> BoardWithOverlay<'a> {
     }
 
     fn get_overlay_at(&self, point: Point) -> Option<&BoardCell> {
-        if !self.strip.contains(&point) {
-            return None;
-        }
+        let dist_from_start = self.strip.distance_in(&point)?;
 
-        // Get distance from required piece to the start of the strip
-        let distance = (point.x as i32 - self.strip.start.x as i32).abs() +
-                       (point.y as i32 - self.strip.start.y as i32).abs();
-
-        self.board_cells[distance as usize].as_ref()
+        self.board_cells[dist_from_start as usize].as_ref()
     }
 
     fn is_point_covered(&self, point: Point) -> bool {
         self.get_overlay_at(point).is_some()
-    }
-
-    /**
-     * Allows us to easily iterate over a line of the board
-     *
-     * The iterator function can control if it want's to continue iterator
-     * by returning a result. An Err will immediately end the iteration
-     */
-    fn for_each_until(
-        &self,
-        start: Point,
-        dir: Direction,
-        f: &mut dyn FnMut(&Point, &BoardCell) -> bool,
-    ) {
-        let mut loc = (start).clone();
-
-        loop {
-            if let Some(bc) = self.get(loc.x as u32, loc.y as u32) {
-                if !f(&loc, bc) {
-                    return;
-                }
-            } else {
-                return;
-            }
-
-            loc += &dir;
-        }
-    }
-
-    fn for_each(
-        &self,
-        strip: &Strip,
-        f: &mut dyn FnMut(&Point, &BoardCell) -> bool,
-    ) {
-        let mut loc = (strip.start).clone();
-
-        for _ in 0..strip.len {
-            if let Some(bc) = self.get(loc.x as u32, loc.y as u32) {
-                if !f(&loc, bc) {
-                    return;
-                }
-            } else {
-                return;
-            }
-
-            loc += &strip.dir;
-        }
     }
 
     /// Returns a vector tuple. The first element stores the flattened tile
@@ -291,9 +266,9 @@ impl<'a> BoardWithOverlay<'a> {
         let mut branching_words = Vec::new();
 
         let perp_direction = if self.strip.dir.is_horizontal() {
-            DIRECTION_DOWN
+            Direction::down()
         } else {
-            DIRECTION_RIGHT
+            Direction::right()
         };
 
         self.for_each(
@@ -311,6 +286,21 @@ impl<'a> BoardWithOverlay<'a> {
         );
 
         (main_line_word, branching_words)
+    }
+
+    pub fn apply_to_board(mut self) -> Board {
+        let mut i = 0usize;
+        let board_cells = &self.board_cells;
+
+        self.board.for_each_mut(&self.strip, &mut |_, board_cell| {
+            if let Some(ref new_board_cell) = board_cells[i] {
+                *board_cell = new_board_cell.clone();
+            }
+            i +=1;
+            true
+        });
+
+        self.board
     }
 }
 
@@ -338,6 +328,70 @@ impl<'a> ReadableBoard for BoardWithOverlay<'a> {
             return Some(cell);
         } else {
             return self.board.get(x, y);
+        }
+    }
+}
+
+trait IterableBoard {
+    fn for_each_until(
+        &self,
+        start: Point,
+        dir: Direction,
+        f: &mut dyn FnMut(&Point, &BoardCell) -> bool,
+    );
+
+    fn for_each(
+        &self,
+        strip: &Strip,
+        f: &mut dyn FnMut(&Point, &BoardCell) -> bool,
+    );
+}
+
+impl <T: ReadableBoard> IterableBoard for T {
+    /**
+     * Allows us to easily iterate over a line of the board
+     *
+     * The iterator function can control if it want's to continue iterator
+     * by returning a result. An Err will immediately end the iteration
+     */
+    fn for_each_until(
+        &self,
+        start: Point,
+        dir: Direction,
+        f: &mut dyn FnMut(&Point, &BoardCell) -> bool,
+    ) {
+        let mut loc = (start).clone();
+
+        loop {
+            if let Some(bc) = self.get(loc.x as u32, loc.y as u32) {
+                if !f(&loc, bc) {
+                    return;
+                }
+            } else {
+                return;
+            }
+
+            loc += &dir;
+        }
+    }
+
+    fn for_each(
+        &self,
+        strip: &Strip,
+        f: &mut dyn FnMut(&Point, &BoardCell) -> bool,
+    ) {
+        let mut loc = (strip.start).clone();
+
+        for _ in 0..strip.len {
+            if let Some(bc) = self.get(loc.x as u32, loc.y as u32) {
+                if !f(&loc, bc) {
+                    return;
+                }
+            } else {
+                return;
+            }
+
+            loc += &strip.dir;
         }
     }
 }
@@ -425,5 +479,91 @@ mod tests {
         );
 
         assert_eq!(board_with_overlay.is_err(), true);
+    }
+
+    fn make_board_with_overlay() -> Result<BoardWithOverlay<'static>> {
+        /*
+         * We construct a board that looks like this (in the top left corner)
+         * .P.C..
+         * .R.R..
+         * ....D. <-- We play MINED here
+         * .M.E..
+         * .E.K..
+         */
+        let mut board = Board::new();
+        board.set(1, 0, BoardCell::Tile(Tile::from('P')))?;
+        board.set(1, 1, BoardCell::Tile(Tile::from('R')))?;
+        // board.set(1, 2, BoardCell::Tile(Tile::from('I')))?;
+        board.set(1, 3, BoardCell::Tile(Tile::from('M')))?;
+        board.set(1, 4, BoardCell::Tile(Tile::from('E')))?;
+
+        board.set(3, 0, BoardCell::Tile(Tile::from('C')))?;
+        board.set(3, 1, BoardCell::Tile(Tile::from('R')))?;
+        // board.set(3, 2, BoardCell::Tile(Tile::from('E')))?;
+        board.set(3, 3, BoardCell::Tile(Tile::from('E')))?;
+        board.set(3, 4, BoardCell::Tile(Tile::from('K')))?;
+
+        board.set(4, 2, BoardCell::Tile(Tile::from('D')))?;
+
+        let board_overlay = BoardWithOverlay::try_overlay(
+            board,
+            Point::new(0, 2),
+            Direction::right(),
+            "MINED"
+        )?;
+
+        Ok(board_overlay)
+    }
+
+    #[test]
+    fn get_overlay_at() -> Result<()> {
+        let board = make_board_with_overlay()?;
+
+        assert_eq!(
+            board.get_overlay_at(Point::new(0, 2)),
+            Some(&BoardCell::Tile(Tile::from('M')))
+        );
+
+        assert_eq!(
+            board.get_overlay_at(Point::new(1, 2)),
+            Some(&BoardCell::Tile(Tile::from('I')))
+        );
+
+        assert_eq!(
+            board.get_overlay_at(Point::new(3, 2)),
+            Some(&BoardCell::Tile(Tile::from('E')))
+        );
+
+        assert_eq!(board.get_overlay_at(Point::new(0, 1)), None);
+        assert_eq!(board.get_overlay_at(Point::new(4, 3)), None);
+        assert_eq!(board.get_overlay_at(Point::new(2, 4)), None);
+        Ok(())
+    }
+
+    #[test]
+    fn full_overlay_test() -> Result<()> {
+        let board_overlay = make_board_with_overlay()?;
+
+        let (main_word, perp_words) = board_overlay.get_formed_words();
+
+        assert_eq!(main_word.len(), 5);
+        assert_eq!(perp_words.len(), 2);
+
+        Ok(())
+    }
+
+    #[test]
+    fn apply_to_board() -> Result<()> {
+        let board_overlay = make_board_with_overlay()?;
+
+        let board = board_overlay.apply_to_board();
+
+        assert_eq!(board.get(0, 2).unwrap(), &BoardCell::Tile(Tile::from('M')));
+        assert_eq!(board.get(1, 2).unwrap(), &BoardCell::Tile(Tile::from('I')));
+        assert_eq!(board.get(2, 2).unwrap(), &BoardCell::Tile(Tile::from('N')));
+        assert_eq!(board.get(3, 2).unwrap(), &BoardCell::Tile(Tile::from('E')));
+        assert_eq!(board.get(4, 2).unwrap(), &BoardCell::Tile(Tile::from('D')));
+
+        Ok(())
     }
 }

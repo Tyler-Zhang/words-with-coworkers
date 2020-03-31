@@ -8,7 +8,7 @@ use std::fmt;
  * Represents how the cell on the board affects the scoring of the final word
  */
 #[derive(Debug, PartialEq)]
-pub struct BoardCellMultiplier {
+struct BoardCellMultiplier {
     pub word: u32,
     pub letter: u32,
 }
@@ -34,7 +34,7 @@ pub enum BoardCell {
 }
 
 impl BoardCell {
-    pub fn get_multiplier(&self) -> BoardCellMultiplier {
+    fn get_multiplier(&self) -> BoardCellMultiplier {
         match self {
             Self::DoubleLetter => BoardCellMultiplier::new(1, 2),
             Self::TripleLetter => BoardCellMultiplier::new(1, 3),
@@ -43,16 +43,33 @@ impl BoardCell {
             _ => BoardCellMultiplier::new(1, 1),
         }
     }
+}
 
-    pub fn to_letter(&self) -> char {
-        match self {
-            Self::StartingSpot => '+',
-            Self::Empty => '.',
-            Self::DoubleLetter => '@',
-            Self::TripleLetter => '#',
-            Self::DoubleWord => '2',
-            Self::TripleWord => '3',
-            Self::Tile(Tile::Letter(letter)) => *letter,
+impl From<char> for BoardCell {
+    fn from(c: char) -> Self {
+        match c {
+            '.' => Self::Empty,
+            '3' => Self::TripleWord,
+            '2' => Self::DoubleWord,
+            '@' => Self::DoubleLetter,
+            '#' => Self::TripleLetter,
+            '+' => Self::StartingSpot,
+            'A'..='Z' => Self::Tile(Tile::Letter(c)),
+            _ => unreachable!(),
+        }
+    }
+}
+
+impl Into<char> for &BoardCell {
+    fn into(self) -> char {
+        match *self {
+            BoardCell::StartingSpot => '+',
+            BoardCell::Empty => '.',
+            BoardCell::DoubleLetter => '@',
+            BoardCell::TripleLetter => '#',
+            BoardCell::DoubleWord => '2',
+            BoardCell::TripleWord => '3',
+            BoardCell::Tile(Tile::Letter(letter)) => letter,
             _ => unreachable!(),
         }
     }
@@ -60,7 +77,7 @@ impl BoardCell {
 
 impl fmt::Display for BoardCell {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.to_letter())
+        write!(f, "{}", Into::<char>::into(self))
     }
 }
 
@@ -111,20 +128,7 @@ impl ReadableBoard for Board {
 
 impl Board {
     pub fn new() -> Board {
-        let mut cells = Vec::with_capacity((BOARD_SIZE * BOARD_SIZE) as usize);
-
-        for c in BOARD.chars() {
-            cells.push(match c {
-                '.' => BoardCell::Empty,
-                '3' => BoardCell::TripleWord,
-                '2' => BoardCell::DoubleWord,
-                '@' => BoardCell::DoubleLetter,
-                '#' => BoardCell::TripleLetter,
-                '+' => BoardCell::StartingSpot,
-                _ => unreachable!("Tried to parse invalid character for board"),
-            })
-        }
-
+        let cells = BOARD.chars().map(|x| BoardCell::from(x)).collect();
         Board { cells }
     }
 

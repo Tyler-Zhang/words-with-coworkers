@@ -68,10 +68,13 @@ impl Game {
         self.turn += 1;
     }
 
-    pub fn get_current_player(&mut self) -> &mut Player {
-        let player_idx = (self.turn as usize) % self.players.len();
+    pub fn get_current_player_idx(&self) -> usize {
+        (self.turn as usize) % self.players.len()
+    }
 
-        &mut self.players[player_idx]
+    pub fn get_current_player(&mut self) -> &mut Player {
+        let idx = self.get_current_player_idx();
+        &mut self.players[idx]
     }
 
     pub fn new(player_count: usize) -> Game {

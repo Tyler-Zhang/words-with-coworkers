@@ -55,7 +55,7 @@ impl From<char> for BoardCell {
             '#' => Self::TripleLetter,
             '+' => Self::StartingSpot,
             'A'..='Z' => Self::Tile(Tile::Letter(c)),
-            _ => unreachable!(),
+            _ => unreachable!("BoardCell:from Parsing invalid tile character {}", c),
         }
     }
 }
@@ -70,7 +70,7 @@ impl Into<char> for &BoardCell {
             BoardCell::DoubleWord => '2',
             BoardCell::TripleWord => '3',
             BoardCell::Tile(Tile::Letter(letter)) => letter,
-            _ => unreachable!(),
+            BoardCell::Tile(Tile::Blank) => unreachable!()
         }
     }
 }

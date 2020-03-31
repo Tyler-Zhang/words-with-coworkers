@@ -1,5 +1,6 @@
 use super::super::error::{Error, Result};
 use rand::prelude::*;
+use rand::rngs::{OsRng};
 use std::fmt;
 
 /**
@@ -122,7 +123,7 @@ impl TileBag {
     }
 
     pub fn shuffle(&mut self) {
-        self.tiles.shuffle(&mut thread_rng());
+        self.tiles.shuffle(&mut OsRng{});
     }
 
     pub fn return_to(&mut self, tiles: &[Tile]) {

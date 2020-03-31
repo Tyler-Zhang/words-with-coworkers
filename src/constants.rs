@@ -12,7 +12,7 @@ pub static HAND_SIZE: usize = 10;
     # - Triple letter
     + - Starting spot
 */
-pub static BOARD: &'static str = "\
+pub static BOARD: &str = "\
   3..@...3...@..3\
   .2...#...#...2.\
   ..2...@.@...2..\

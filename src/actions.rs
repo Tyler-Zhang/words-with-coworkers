@@ -65,10 +65,10 @@ fn ensure_play_builds_on_other_words(
     branching_words: &[OverlaidWord],
     used_tiles: &[Tile],
 ) -> Result<()> {
-    if used_tiles.len() == 0 {
+    if used_tiles.is_empty() {
         Err(Error::NoLettersUsed.into())
     } else if main_line_word.len() == original_word.len()
-        && branching_words.len() == 0
+        && branching_words.is_empty()
         && used_tiles.len() == original_word.len()
     {
         Err(Error::WordDoesNotIntersect.into())
@@ -77,11 +77,11 @@ fn ensure_play_builds_on_other_words(
     }
 }
 
-pub fn play_word(game: Game, start: &Point, dir: &Direction, word: &str) -> Result<Game> {
+pub fn play_word(game: Game, start: Point, dir: Direction, word: &str) -> Result<Game> {
     let mut game = game;
 
     let board_overlay =
-        BoardWithOverlay::try_overlay(game.board.clone(), start.clone(), dir.clone(), word)?;
+        BoardWithOverlay::try_overlay(game.board.clone(), start, dir, word)?;
 
     // Check validity of formed words, and add up the score
     let (main_line_word, branching_words) = board_overlay.get_formed_words();

@@ -14,8 +14,8 @@ fn full_game_test() -> Result<()>{
     println!("{}", game);
     game = play_word(
         game,
-        &Point::new(7, 7),
-        &Direction::right(),
+        Point::new(7, 7),
+        Direction::right(),
         "ACTOR"
     )?;
 
@@ -26,8 +26,8 @@ fn full_game_test() -> Result<()>{
     stub_current_player_hand(&mut game, "BOARSANALS");
     game = play_word(
         game,
-        &Point::new(10, 6),
-        &Direction::down(),
+        Point::new(10, 6),
+        Direction::down(),
         "BOARS"
     )?;
 
@@ -36,8 +36,8 @@ fn full_game_test() -> Result<()>{
 
     game = play_word(
         game,
-        &Point::new(7, 5),
-        &Direction::down(),
+        Point::new(7, 5),
+        Direction::down(),
         "SEA"
     )?;
     assert_eq!(game.players[0].score, 11);
@@ -45,24 +45,24 @@ fn full_game_test() -> Result<()>{
     // Tests that it counts the C above ANAL
     game = play_word(
         game,
-        &Point::new(8,8),
-        &Direction::down(),
+        Point::new(8,8),
+        Direction::down(),
         "ANAL"
     )?;
     assert_eq!(game.players[1].score, 22);
 
     game = play_word(
         game,
-        &Point::new(7,5),
-        &Direction::right(),
+        Point::new(7,5),
+        Direction::right(),
         "SOY"
     )?;
     assert_eq!(game.players[0].score, 25);
 
     game = play_word(
         game,
-        &Point::new(12,7),
-        &Direction::right(),
+        Point::new(12,7),
+        Direction::right(),
         "S"
     )?;
     assert_eq!(game.players[1].score, 30);
@@ -78,8 +78,8 @@ fn no_cover_starting() {
 
     let result = play_word(
         game,
-        &Point::new(7, 6),
-        &Direction::right(),
+        Point::new(7, 6),
+        Direction::right(),
         "ACTOR"
     );
 

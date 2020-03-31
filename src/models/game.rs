@@ -48,10 +48,10 @@ impl Game {
         }
 
         Game {
-            board: board,
-            players: players,
+            board,
+            players,
             turn: 0,
-            tile_bag: tile_bag,
+            tile_bag,
             has_word_been_played: false,
         }
     }

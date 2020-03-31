@@ -16,8 +16,8 @@ pub struct BoardCellMultiplier {
 impl BoardCellMultiplier {
     pub fn new(word: u32, letter: u32) -> Self {
         BoardCellMultiplier {
-            word: word,
-            letter: letter,
+            word,
+            letter,
         }
     }
 }
@@ -132,6 +132,7 @@ impl Board {
         Board { cells }
     }
 
+    #[allow(dead_code)]
     fn set(&mut self, point: &Point, bc: BoardCell) -> Result<()> {
         if !self.is_in_bounds(point) {
             return Err(Error::BadAction(format!("Out of bounds")).into());
@@ -173,16 +174,15 @@ impl Board {
  * A decorator for a Board that places an "uncommitted" line of pieces above
  * a line on the original board
  */
-pub struct BoardWithOverlay<'a> {
+pub struct BoardWithOverlay {
     board: Board,
     strip: Strip,
-    word: &'a str,
     board_cells: Vec<Option<BoardCell>>,
 }
 
 pub type OverlaidWord = Vec<(BoardCell, Option<BoardCell>)>;
 
-impl<'a> BoardWithOverlay<'a> {
+impl BoardWithOverlay {
     fn get_overlay_mask(board: &Board, strip: &Strip, word: &str) -> Result<Vec<Option<BoardCell>>> {
         let mut curr_point = strip.start.clone();
 
@@ -209,12 +209,12 @@ impl<'a> BoardWithOverlay<'a> {
         Ok(mask)
     }
 
-    pub fn try_overlay<'b>(
+    pub fn try_overlay(
         board: Board,
         point: Point,
         dir: Direction,
-        word: &'b str,
-    ) -> Result<BoardWithOverlay<'b>> {
+        word: &str,
+    ) -> Result<BoardWithOverlay> {
         let strip = Strip::new(point, dir, word.len() as i32);
 
         let overlay_mask = Self::get_overlay_mask(&board, &strip, word)?;
@@ -222,7 +222,6 @@ impl<'a> BoardWithOverlay<'a> {
         let bwo = BoardWithOverlay {
             board,
             strip,
-            word,
             board_cells: overlay_mask
         };
 
@@ -340,7 +339,7 @@ impl<'a> BoardWithOverlay<'a> {
     }
 }
 
-impl<'a> ReadableBoard for BoardWithOverlay<'a> {
+impl ReadableBoard for BoardWithOverlay {
     fn is_in_bounds(&self, point: &Point) -> bool {
         self.board.is_in_bounds(point)
     }
@@ -359,9 +358,9 @@ impl<'a> ReadableBoard for BoardWithOverlay<'a> {
         // and not just a part of the strip, then we return the cell
         // otherwise, we return the underlying piece
         if let Some(ref cell) = self.get_overlay_at(point) {
-            return Some(cell);
+            Some(cell)
         } else {
-            return self.board.get(point);
+            self.board.get(point)
         }
     }
 }
@@ -515,7 +514,7 @@ mod tests {
         assert_eq!(board_with_overlay.is_err(), true);
     }
 
-    fn make_board_with_overlay() -> Result<BoardWithOverlay<'static>> {
+    fn make_board_with_overlay() -> Result<BoardWithOverlay> {
         /*
          * We construct a board that looks like this (in the top left corner)
          * .P.C..

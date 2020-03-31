@@ -1,4 +1,4 @@
-use super::super::constants::{BOARD, BOARD_SIZE};
+use super::super::constants::{BOARD, BOARD_SIZE, DICTIONARY};
 use super::super::error::{Error, Result};
 use super::tile::Tile;
 use super::{Direction, Point, Strip};
@@ -172,7 +172,66 @@ pub struct BoardWithOverlay {
     board_cells: Vec<Option<BoardCell>>,
 }
 
-pub type OverlaidWord = Vec<(BoardCell, Option<BoardCell>)>;
+pub struct OverlaidWord(Vec<(BoardCell, Option<BoardCell>)>);
+
+impl std::ops::Deref for OverlaidWord {
+    type Target = Vec<(BoardCell, Option<BoardCell>)>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl OverlaidWord {
+    pub fn calculate_word_score(&self) -> Result<u32> {
+        let mut aggregate_word = Vec::<char>::with_capacity(self.len());
+
+        let mut letter_score = 0;
+        let mut word_multiplier = 1;
+
+        for (bc, bottom_bc) in self.iter() {
+            let curr_letter_val = match bc {
+                BoardCell::Tile(tile) => {
+                    match tile {
+                        Tile::Letter(letter) => aggregate_word.push(*letter),
+                        _ => unreachable!(),
+                    }
+                    tile.point_value()
+                }
+                _ => unreachable!(),
+            };
+
+            if let Some(under_board_cell) = bottom_bc {
+                let BoardCellMultiplier {
+                    word: word_mult,
+                    letter: letter_mult,
+                } = under_board_cell.get_multiplier();
+
+                letter_score += curr_letter_val * letter_mult;
+                word_multiplier *= word_mult;
+            } else {
+                letter_score += curr_letter_val;
+            }
+        }
+
+        let word = aggregate_word.into_iter().collect::<String>();
+        if !DICTIONARY.contains(&word[..]) {
+            Err(Error::InvalidWord(word).into())
+        } else {
+            Ok(letter_score * word_multiplier)
+        }
+    }
+
+    pub fn ensure_word_covering_starting_spot(&self) -> Result<()> {
+        for (_, under_bc) in self.iter() {
+            if let Some(BoardCell::StartingSpot) = under_bc {
+                return Ok(());
+            }
+        }
+
+        Err(Error::StartingTileNotCovered.into())
+    }
+}
 
 impl BoardWithOverlay {
     fn get_overlay_mask(
@@ -283,7 +342,7 @@ impl BoardWithOverlay {
         word.append(&mut opposite_dir);
         word.append(&mut self.get_connecting_letters_from(start, dir));
 
-        word
+        OverlaidWord(word)
     }
 
     pub fn get_formed_words(&self) -> (OverlaidWord, Vec<OverlaidWord>) {

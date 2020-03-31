@@ -9,3 +9,7 @@ edition = "2018"
 [dependencies]
 rand = "0.7.2"
 lazy_static = "1.4.0"
+wasm-bindgen = "0.2"
+
+[lib]
+crate-type = ["cdylib", "rlib"]

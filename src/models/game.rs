@@ -1,13 +1,32 @@
+use std::fmt;
 use super::board::Board;
 use super::tile::TileBag;
 use super::player::Player;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Game {
   pub board: Board,
   pub players: Vec<Player>,
   pub turn: u32,
   pub tile_bag: TileBag,
+  pub has_word_been_played: bool,
+}
+
+impl fmt::Display for Game {
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    writeln!(f, "Board:")?;
+    self.board.fmt(f)?;
+
+    writeln!(f, "Players:")?;
+    for (idx, ref player) in self.players.iter().enumerate() {
+      writeln!(f, "{}: score: {}, pieces: {:?}", idx, player.score, player.hand)?;
+    }
+
+    writeln!(f, "Other:")?;
+    writeln!(f, "turn: {}, has_word_been_played:{}, tile_bag: {}", self.turn, self.has_word_been_played, self.tile_bag)?;
+
+    Ok(())
+  }
 }
 
 impl Game {
@@ -25,13 +44,18 @@ impl Game {
       players: players,
       turn: 0,
       tile_bag: tile_bag,
+      has_word_been_played: false
     }
   }
 
-  pub fn get_current_player<'a>(&'a mut self) -> &'a mut Player {
+  pub fn get_current_player(&mut self) -> &mut Player {
     let player_idx = (self.turn as usize) % self.players.len();
 
     &mut self.players[player_idx]
+  }
+
+  pub fn increment_turn(&mut self) {
+    self.turn += 1;
   }
 }
 

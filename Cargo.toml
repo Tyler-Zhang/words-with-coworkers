@@ -1,5 +1,5 @@
 [package]
-name = "words-with-coworkers"
+name = "scrabble"
 version = "0.1.0"
 authors = ["tyler <tztylerzhang@gmail.com>"]
 edition = "2018"

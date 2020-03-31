@@ -1,5 +1,6 @@
-use rand::prelude::*;
 use std::fmt;
+use super::super::error::{Error, Result};
+use rand::prelude::*;
 
 /**
  * This macro is used to add some syntactic sugar to when we're pushing
@@ -62,36 +63,34 @@ impl From<char> for Tile {
   }
 }
 
-pub struct NotEnoughTilesError;
-
-impl fmt::Debug for NotEnoughTilesError {
-  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-    write!(f, "There's not enough tiles")
-  }
-}
-
-impl fmt::Display for NotEnoughTilesError {
-  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-    write!(f, "There's not enough tiles")
-  }
-}
-
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TileBag {
   pub tiles: Vec<Tile>,
+}
+
+impl fmt::Display for TileBag {
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    for tile in self.tiles.iter() {
+      match tile {
+        Tile::Blank => write!(f, "[]")?,
+        Tile::Letter(letter) => write!(f, "{}", letter)?,
+      }
+    }
+    Ok(())
+  }
 }
 
 impl TileBag {
   pub fn new() -> TileBag {
     let mut tiles = Vec::with_capacity(100);
 
-    push_repeat(&mut tiles, Tile::Blank, 2);
+    // push_repeat(&mut tiles, Tile::Blank, 2);
     push_letter_tiles! {
       &mut tiles,
       'E' * 12,
       'A' * 9,
       'I' * 9,
-      '0' * 8,
+      'O' * 8,
       'N' * 6,
       'R' * 6,
       'T' * 6,
@@ -134,11 +133,11 @@ impl TileBag {
     self.shuffle();
   }
 
-  pub fn draw(&mut self, count: usize) -> Result<Vec<Tile>, NotEnoughTilesError> {
+  pub fn draw(&mut self, count: usize) -> Result<Vec<Tile>> {
     if count <= self.tiles.len() {
       Ok(self.tiles.drain(0..count).collect())
     } else {
-      Err(NotEnoughTilesError {})
+      Err(Error::NotEnoughTiles.into())
     }
   }
 

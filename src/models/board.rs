@@ -1,3 +1,4 @@
+use std::fmt;
 use super::super::constants::{BOARD, BOARD_SIZE};
 use super::super::error::{Error, Result};
 use super::tile::Tile;
@@ -8,8 +9,8 @@ use super::{Direction, Point, Strip};
  */
 #[derive(Debug, PartialEq)]
 pub struct BoardCellMultiplier {
-    word: u32,
-    letter: u32,
+    pub word: u32,
+    pub letter: u32,
 }
 
 impl BoardCellMultiplier {
@@ -45,6 +46,25 @@ impl BoardCell {
             _ => BoardCellMultiplier::new(1, 1),
         }
     }
+
+    pub fn to_letter(&self) -> char {
+        match self {
+            Self::StartingSpot => '+',
+            Self::Empty => '.',
+            Self::DoubleLetter => '@',
+            Self::TripleLetter => '#',
+            Self::DoubleWord => '2',
+            Self::TripleWord => '3',
+            Self::Tile(Tile::Letter(letter)) => *letter,
+            _ => unreachable!()
+        }
+    }
+}
+
+impl fmt::Display for BoardCell {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.to_letter())
+    }
 }
 
 /**
@@ -55,14 +75,27 @@ trait ReadableBoard {
     fn get(&self, point: &Point) -> Option<&BoardCell>;
 }
 
+
 #[inline]
 fn xy_to_idx(width: u32, point: &Point) -> usize {
     (point.y * width as i32 + point.x) as usize
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Board {
     pub cells: Vec<BoardCell>,
+}
+
+impl fmt::Display for Board {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        for y in 0..BOARD_SIZE {
+            for x in 0..BOARD_SIZE {
+                self.get(&Point::new(x as i32, y as i32)).unwrap().fmt(f)?;
+            }
+            writeln!(f)?
+        }
+        Ok(())
+    }
 }
 
 impl ReadableBoard for Board {
@@ -147,7 +180,7 @@ pub struct BoardWithOverlay<'a> {
     board_cells: Vec<Option<BoardCell>>,
 }
 
-type OverlaidWord = Vec<(BoardCell, Option<BoardCell>)>;
+pub type OverlaidWord = Vec<(BoardCell, Option<BoardCell>)>;
 
 impl<'a> BoardWithOverlay<'a> {
     fn get_overlay_mask(board: &Board, strip: &Strip, word: &str) -> Result<Vec<Option<BoardCell>>> {

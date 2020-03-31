@@ -1,7 +1,7 @@
-extern crate scrabble;
+extern crate words_game;
 mod common;
 
-use ::scrabble::{Result, Point, Direction, Game};
+use words_game::{Result, Point, Direction, Game};
 use common::stub_current_player_hand;
 
 

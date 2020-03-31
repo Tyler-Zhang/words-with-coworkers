@@ -1,4 +1,4 @@
-use scrabble::{Game, Tile};
+use words_game::{Game, Tile};
 
 pub fn stub_current_player_hand(game: &mut Game, hand: &str) {
     let current_player = game.get_current_player();

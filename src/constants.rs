@@ -32,30 +32,30 @@ pub static BOARD: &'static str = "\
 pub static BOARD_SIZE: u32 = 15;
 
 lazy_static! {
-  pub static ref DICTIONARY: HashSet<&'static str> = {
-    let mut dict = HashSet::new();
+    pub static ref DICTIONARY: HashSet<&'static str> = {
+        let mut dict = HashSet::new();
 
-    let words = include_str!("dictionary.txt");
+        let words = include_str!("dictionary.txt");
 
-    for line in words.lines() {
-      dict.insert(line);
-    }
+        for line in words.lines() {
+            dict.insert(line);
+        }
 
-    dict
-  };
+        dict
+    };
 }
 
 #[cfg(test)]
 mod tests {
-  use super::*;
+    use super::*;
 
-  #[test]
-  fn dictionary_has_word() {
-    assert_eq!(DICTIONARY.contains("MOTORCYCLE"), true);
-  }
+    #[test]
+    fn dictionary_has_word() {
+        assert_eq!(DICTIONARY.contains("MOTORCYCLE"), true);
+    }
 
-  #[test]
-  fn dictionary_no_word() {
-    assert_eq!(DICTIONARY.contains("BLAHBLAHBLAH"), false);
-  }
+    #[test]
+    fn dictionary_no_word() {
+        assert_eq!(DICTIONARY.contains("BLAHBLAHBLAH"), false);
+    }
 }

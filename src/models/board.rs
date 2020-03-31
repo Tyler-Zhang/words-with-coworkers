@@ -282,7 +282,7 @@ impl<'a> BoardWithOverlay<'a> {
     }
 
     pub fn get_whole_word(&self, start: &Point, dir: &Direction) -> OverlaidWord {
-        let mut start = *start;
+        let start = *start;
         let dir = *dir;
 
         let mut word = Vec::new();

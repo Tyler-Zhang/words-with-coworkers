@@ -94,8 +94,8 @@ pub fn play_word(game: Game, start: Point, dir: Direction, word: &str) -> Result
         ensure_play_builds_on_other_words(
             word,
             &main_line_word,
-            &branching_words[..],
-            &needed_tiles[..],
+            &branching_words,
+            &needed_tiles,
         )?;
     }
 
@@ -110,7 +110,7 @@ pub fn play_word(game: Game, start: Point, dir: Direction, word: &str) -> Result
     let new_tiles = game.tile_bag.draw_upto(needed_tiles.len());
     let player = game.get_current_player();
 
-    player.remove_tiles_from_hand(&needed_tiles[..])?;
+    player.remove_tiles_from_hand(&needed_tiles)?;
     player.add_tiles_to_hand(new_tiles);
 
     // Apply new score to the player

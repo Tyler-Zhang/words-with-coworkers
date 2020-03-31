@@ -2,8 +2,8 @@ use super::super::constants::HAND_SIZE;
 use super::super::error::{Error, Result};
 use super::tile::{Tile, TileBag};
 
-fn remove_tiles(src: &Vec<Tile>, tiles: &[Tile]) -> Result<Vec<Tile>> {
-    let mut rtn_tiles = src.clone();
+fn remove_tiles(src: &[Tile], tiles: &[Tile]) -> Result<Vec<Tile>> {
+    let mut rtn_tiles = src.to_vec();
 
     for tile in tiles {
         let idx = rtn_tiles

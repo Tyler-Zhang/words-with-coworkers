@@ -23,8 +23,8 @@ impl ops::Add<Direction> for Point {
     }
 }
 
-impl ops::AddAssign<&Direction> for Point {
-    fn add_assign(&mut self, other: &Direction) {
+impl ops::AddAssign<Direction> for Point {
+    fn add_assign(&mut self, other: Direction) {
         self.x += other.x;
         self.y += other.y;
     }
@@ -41,11 +41,11 @@ impl Direction {
         Direction { x, y }
     }
 
-    pub fn is_horizontal(&self) -> bool {
+    pub fn is_horizontal(self) -> bool {
         self.x != 0
     }
 
-    pub fn is_vertical(&self) -> bool {
+    pub fn is_vertical(self) -> bool {
         self.y != 0
     }
 
@@ -93,7 +93,7 @@ impl Strip {
         }
     }
 
-    pub fn contains(&self, point: &Point) -> bool {
+    pub fn contains(&self, point: Point) -> bool {
         (
             point.x == self.start.x ||
             Self::is_between(point.x, self.start.x, self.start.x + self.dir.x * self.len)
@@ -106,7 +106,7 @@ impl Strip {
     /**
      * Get the distance of the point from the start of the strip
      */
-    pub fn distance_in(&self, point: &Point) -> Option<i32> {
+    pub fn distance_in(&self, point: Point) -> Option<i32> {
         if !self.contains(point) {
             None
         } else {
@@ -129,15 +129,15 @@ mod tests {
             5
         );
 
-        assert_eq!(s.contains(&Point::new(5, 5)), true);
-        assert_eq!(s.contains(&Point::new(6, 5)), true);
-        assert_eq!(s.contains(&Point::new(10, 5)), false);
+        assert_eq!(s.contains(Point::new(5, 5)), true);
+        assert_eq!(s.contains(Point::new(6, 5)), true);
+        assert_eq!(s.contains(Point::new(10, 5)), false);
 
-        assert_eq!(s.contains(&Point::new(5, 6)), false);
-        assert_eq!(s.contains(&Point::new(5, 4)), false);
+        assert_eq!(s.contains(Point::new(5, 6)), false);
+        assert_eq!(s.contains(Point::new(5, 4)), false);
 
-        assert_eq!(s.contains(&Point::new(4, 5)), false);
-        assert_eq!(s.contains(&Point::new(3, 5)), false);
+        assert_eq!(s.contains(Point::new(4, 5)), false);
+        assert_eq!(s.contains(Point::new(3, 5)), false);
     }
 
     #[test]
@@ -148,14 +148,14 @@ mod tests {
             5
         );
 
-        assert_eq!(s.contains(&Point::new(5, 5)), true);
-        assert_eq!(s.contains(&Point::new(6, 5)), false);
-        assert_eq!(s.contains(&Point::new(10, 5)), false);
+        assert_eq!(s.contains(Point::new(5, 5)), true);
+        assert_eq!(s.contains(Point::new(6, 5)), false);
+        assert_eq!(s.contains(Point::new(10, 5)), false);
 
-        assert_eq!(s.contains(&Point::new(5, 4)), true);
-        assert_eq!(s.contains(&Point::new(5, 1)), true);
-        assert_eq!(s.contains(&Point::new(5, 0)), false);
+        assert_eq!(s.contains(Point::new(5, 4)), true);
+        assert_eq!(s.contains(Point::new(5, 1)), true);
+        assert_eq!(s.contains(Point::new(5, 0)), false);
 
-        assert_eq!(s.contains(&Point::new(5, 6)), false);
+        assert_eq!(s.contains(Point::new(5, 6)), false);
     }
 }

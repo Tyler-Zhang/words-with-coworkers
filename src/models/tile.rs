@@ -36,7 +36,7 @@ pub enum Tile {
 }
 
 impl Tile {
-    pub fn point_value(&self) -> u32 {
+    pub fn point_value(self) -> u32 {
         match self {
             Self::Blank => 0,
             Self::Letter(letter) => match letter {
@@ -63,7 +63,7 @@ impl From<char> for Tile {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct TileBag {
     pub tiles: Vec<Tile>,
 }

@@ -5,6 +5,12 @@ use super::direction::*;
 use super::tile::{TileBag, Tile};
 use std::fmt;
 
+#[derive(Debug)]
+pub struct PlayWordResult {
+    words: Vec<String>,
+    score: u32,
+}
+
 #[derive(Debug, Clone)]
 pub struct Game {
     pub board: Board,
@@ -86,7 +92,7 @@ impl Game {
         }
     }
 
-    pub fn play_word(&mut self, start: Point, dir: Direction, word: &str) -> Result<()> {
+    pub fn play_word(&mut self, start: Point, dir: Direction, word: &str) -> Result<PlayWordResult> {
         let mut game = self.clone();
 
         let board_overlay =
@@ -109,10 +115,16 @@ impl Game {
         }
 
         let mut total_score = 0u32;
-        total_score += main_line_word.calculate_word_score()?;
+        let mut total_formed_words = Vec::<String>::new();
+
+        let (word, score) = main_line_word.calculate_word_and_score()?;
+        total_formed_words.push(word);
+        total_score += score;
 
         for branching_word in branching_words.iter() {
-            total_score += branching_word.calculate_word_score()?;
+            let (word, score) = branching_word.calculate_word_and_score()?;
+            total_formed_words.push(word);
+            total_score += score;
         }
 
         // Check to make sure the player has the letters to make this play
@@ -131,7 +143,7 @@ impl Game {
         game.increment_turn();
 
         *self = game;
-        Ok(())
+        Ok(PlayWordResult{words: total_formed_words, score: total_score})
     }
 }
 

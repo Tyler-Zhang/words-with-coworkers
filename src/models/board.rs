@@ -183,7 +183,7 @@ impl std::ops::Deref for OverlaidWord {
 }
 
 impl OverlaidWord {
-    pub fn calculate_word_score(&self) -> Result<u32> {
+    pub fn calculate_word_and_score(&self) -> Result<(String, u32)> {
         let mut aggregate_word = Vec::<char>::with_capacity(self.len());
 
         let mut letter_score = 0;
@@ -218,7 +218,7 @@ impl OverlaidWord {
         if !DICTIONARY.contains(&word[..]) {
             Err(Error::InvalidWord(word).into())
         } else {
-            Ok(letter_score * word_multiplier)
+            Ok((word, letter_score * word_multiplier))
         }
     }
 

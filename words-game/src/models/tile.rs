@@ -1,3 +1,4 @@
+use serde::{Serialize, Deserialize, Serializer, Deserializer};
 use super::super::error::{Error, Result};
 use rand::prelude::*;
 use rand::rngs::{OsRng};
@@ -73,7 +74,20 @@ impl Into<char> for Tile {
     }
 }
 
-#[derive(Debug, Clone, Default)]
+impl Serialize for Tile {
+    fn serialize<S: Serializer>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error> {
+        serializer.serialize_char(Into::<char>::into(*self))
+    }
+}
+
+impl<'de> Deserialize<'de> for Tile {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> std::result::Result<Tile, D::Error> {
+        let c = char::deserialize(deserializer)?;
+        Ok(Self::from(c))
+    }
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct TileBag {
     pub tiles: Vec<Tile>,
 }

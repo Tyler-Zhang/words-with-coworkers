@@ -1,3 +1,4 @@
+use serde::{Serialize, Deserialize};
 use super::super::error::*;
 use super::board::{Board, OverlaidWord, BoardWithOverlay};
 use super::player::Player;
@@ -11,7 +12,7 @@ pub struct PlayWordResult {
     pub score: u32,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Game {
     pub board: Board,
     pub players: Vec<Player>,
@@ -148,6 +149,14 @@ impl Game {
         *self = game;
         Ok(PlayWordResult{words: total_formed_words, score: total_score})
     }
+
+    pub fn serialize(&self) -> String {
+        serde_json::to_string(self).unwrap()
+    }
+
+    pub fn from_serialized(serialized: &str) -> serde_json::Result<Self> {
+        serde_json::from_str(serialized)
+    }
 }
 
 #[cfg(test)]
@@ -168,5 +177,15 @@ mod tests {
     #[test]
     fn tile_bag_different() {
         assert_ne!(Game::new(1).tile_bag.tiles, Game::new(1).tile_bag.tiles);
+    }
+
+    #[test]
+    fn serialization() {
+        let game = Game::new(2);
+
+        let serialized = game.serialize();
+        let deserialized = Game::form_serialized(&serialized).unwrap();
+
+        assert_eq!(game.players.len(), deserialized.players.len());
     }
 }

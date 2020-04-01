@@ -1,3 +1,4 @@
+use serde::{Serialize, Deserialize};
 use super::super::constants::{BOARD, BOARD_SIZE, DICTIONARY};
 use super::super::error::{Error, Result};
 use super::tile::Tile;
@@ -22,7 +23,7 @@ impl BoardCellMultiplier {
 /**
  * Represents the state of a cell on the board
  */
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum BoardCell {
     StartingSpot,
     Empty,
@@ -94,7 +95,7 @@ fn xy_to_idx(width: u32, point: Point) -> usize {
     (point.y * width as i32 + point.x) as usize
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Board {
     pub cells: Vec<BoardCell>,
 }

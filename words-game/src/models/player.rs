@@ -1,3 +1,4 @@
+use serde::{Serialize, Deserialize};
 use super::super::constants::HAND_SIZE;
 use super::super::error::{Error, Result};
 use super::tile::{Tile, TileBag};
@@ -21,7 +22,7 @@ fn remove_tiles(src: &[Tile], tiles: &[Tile]) -> Result<Vec<Tile>> {
  * Represents a player in the game, a player does not have a unique id
  * and instead is kept track based on its index within the players vector
  */
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Player {
     pub score: u32,
     pub hand: Vec<Tile>,

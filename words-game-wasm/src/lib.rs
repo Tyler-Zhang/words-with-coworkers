@@ -100,7 +100,7 @@ impl From<&words_game::Board> for Board {
 
 pub type Result<T> = std::result::Result<T, JsValue>;
 
-fn err_mapper(err: Box<words_game::Error>) -> JsValue {
+fn err_mapper<T: std::fmt::Display>(err: T) -> JsValue {
     JsValue::from_str(&format!("{}", err))
 }
 
@@ -143,5 +143,16 @@ impl Game {
     #[wasm_bindgen(getter)]
     pub fn board(&self) -> Board {
         Into::into(&self.0.board)
+    }
+
+    pub fn serialize(&self) -> String {
+        self.0.serialize()
+    }
+
+    pub fn from_serialized(s: &str) -> Result<Game> {
+        let board = words_game::Game::from_serialized(s)
+                        .map_err(err_mapper)?;
+
+        Ok(Self(board))
     }
 }

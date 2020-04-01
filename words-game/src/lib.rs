@@ -7,3 +7,5 @@ pub mod models;
 
 pub use models::*;
 pub use error::*;
+
+pub use constants::{BOARD_SIZE, BOARD};

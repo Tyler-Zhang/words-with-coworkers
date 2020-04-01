@@ -7,8 +7,8 @@ use std::fmt;
 
 #[derive(Debug)]
 pub struct PlayWordResult {
-    words: Vec<String>,
-    score: u32,
+    pub words: Vec<String>,
+    pub score: u32,
 }
 
 #[derive(Debug, Clone)]

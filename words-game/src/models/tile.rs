@@ -64,6 +64,15 @@ impl From<char> for Tile {
     }
 }
 
+impl Into<char> for Tile {
+    fn into(self) -> char {
+        match self {
+            Tile::Letter(letter) => letter,
+            Tile::Blank => ' ',
+        }
+    }
+}
+
 #[derive(Debug, Clone, Default)]
 pub struct TileBag {
     pub tiles: Vec<Tile>,

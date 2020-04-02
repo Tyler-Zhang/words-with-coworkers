@@ -10,7 +10,8 @@ defmodule WordsGameSlack.GameSave do
             on: p.game_id == g.id,
             where: p.user_id == ^user_id
               and g.channel_id == ^channel_id
-              and g.team_id == ^team_id
+              and g.team_id == ^team_id,
+            order_by: p.index
 
     query |> Repo.one
   end

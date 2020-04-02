@@ -1,3 +1,5 @@
+# Use emojipacks cli tool ( https://github.com/lambtron/emojipacks )
+# To load these into your slack workspace
 title: slackmoji-scrabble-letters
 emojis:
   - name: scrabble-a
@@ -54,15 +56,15 @@ emojis:
     src: http://emojis.slackmojis.com/emojis/images/1481250754/1467/y.jpg
   - name: scrabble-z
     src: http://emojis.slackmojis.com/emojis/images/1481251057/1468/z.jpg
-  - name: scrabble_board
+  - name: scrabble-board
     src: https://i.imgur.com/1erx2Kps.png
-  - name: scrabble_start
+  - name: scrabble-start
     src: https://i.imgur.com/TAhkkY5s.png
-  - name: scrabble_triple_word
+  - name: scrabble-triple-word
     src: https://i.imgur.com/AAnqSy9s.png
-  - name: scrabble_double_word
+  - name: scrabble-double-word
     src: https://i.imgur.com/F1GnCcDs.png
-  - name: scrabble_triple_letter
+  - name: scrabble-triple-letter
     src: https://i.imgur.com/I86pV96s.png
-  - name: scrabble_double_letter
+  - name: scrabble-double-letter
     src: https://i.imgur.com/TdVLFaLs.png

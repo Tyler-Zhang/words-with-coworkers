@@ -38,7 +38,7 @@ defmodule WordsGameSlack.GameSave do
       %{
         channel_id: channel_id,
         team_id: team_id,
-        data: Poison.encode!(words_game)
+        data: WordsGameElixir.serialize(words_game)
       }
     )
       |> Ecto.Changeset.put_assoc(:players, players)

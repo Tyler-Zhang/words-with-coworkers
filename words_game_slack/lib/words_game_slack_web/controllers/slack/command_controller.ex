@@ -10,10 +10,14 @@ defmodule WordsGameSlackWeb.Slack.CommandController do
       Logger.error("Params missing expected keys #{params}, expected: #{@expected_keys}")
       nil
     else
-      result = Commands.parse(params["command"], params["text"])
-                |> execute_command(params)
+      result = with {:ok, command} <- Commands.parse(params["command"], params["text"]) do
+        execute_command(command, params)
+      end
 
-      respond(conn, result)
+      case result do
+        {:ok, data} -> respond(conn, data)
+        {:error, reason} -> respond(conn, reason, "ephemeral")
+      end
     end
   end
 
@@ -35,10 +39,10 @@ defmodule WordsGameSlackWeb.Slack.CommandController do
         |> GameSave.create_new_game(team_id, channel_id)
 
       with {:ok, game} <- new_game do
-        Poison.encode!(game)
+        WordsGameSlack.Slack.render_game(game)
       end
     else
-      "You are already in a game on this channel!"
+      {:error, "You are already in a game on this channel!"}
     end
   end
 
@@ -46,8 +50,8 @@ defmodule WordsGameSlackWeb.Slack.CommandController do
     Enum.all?(@expected_keys, &(Map.has_key?(params, &1)))
   end
 
-  defp respond(conn, data) do
-    data = %{"response_type": "in_channel", "text": data }
+  defp respond(conn, data, type \\ "in_channel") do
+    data = %{response_type: type, text: data }
     json(conn, data)
   end
 end

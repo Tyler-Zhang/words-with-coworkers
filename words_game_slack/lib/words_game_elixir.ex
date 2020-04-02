@@ -1,5 +1,6 @@
 defmodule WordsGameElixir do
   use Rustler, otp_app: :words_game_slack, crate: "words_game_elixir"
+  alias __MODULE__
 
   # When your NIF is loaded, it will override this function.
   def new_game(_player_count), do: :erlang.nif_error(:nif_not_loaded)
@@ -43,4 +44,21 @@ defmodule WordsGameElixir do
     defstruct [:score, :words]
   end
 
+  def serialize(%WordsGameElixir{} = game), do: Poison.encode!(game)
+
+  @spec deserialize(String.t) :: {:error, String.t} | {:ok, WordsGameElixir.t()}
+  def deserialize(str) do
+    decoded = Poison.decode!(
+      str,
+      as: %WordsGameElixir{
+        board: %Board{},
+        players: [%Player{}]
+      }
+    )
+
+    case decoded do
+      nil -> {:error, "Could not serialize"}
+      s -> {:ok, s}
+    end
+  end
 end

@@ -82,9 +82,10 @@ defmodule WordsGameSlackWeb.Slack.CommandController do
     end
   end
 
-  defp execute_command(%Commands.Play{start: start, dir: dir, word: word}, params) do
+  defp execute_command(%Commands.Play{start: start, dir: dir, word: word}, %{"user_id" => user_id} = params) do
     with {:ok, game_save} <- game_from_params(params),
          {:ok, words_game} <- WordsGameElixir.deserialize(game_save),
+         :ok <- ensure_player_turn(words_game, GameSave.player_idx_in_game(game_save, user_id)),
          {:ok, play_word_result, new_words_game} <-
            words_game |> WordsGameElixir.play_word(start, dir, word),
          {:ok, new_game_save} <- GameSave.update(game_save, new_words_game),
@@ -100,6 +101,21 @@ defmodule WordsGameSlackWeb.Slack.CommandController do
     is_valid = word |> String.upcase |> WordsGameElixir.check_dictionary
 
     { :ok, :ephemeral, "#{word} is #{if is_valid, do: "valid", else: "not valid"}"}
+  end
+
+  defp execute_command(%Commands.Quit{}, params) do
+    with {:ok, game} <- game_from_params(params) do
+      GameSave.delete(game)
+      {:ok, "Game has ended"}
+    end
+  end
+
+  defp ensure_player_turn(%WordsGameElixir{} = game, player_idx) do
+    if WordsGameElixir.get_current_player_idx(game) == player_idx do
+      :ok
+    else
+      {:error, "It is not your turn to play"}
+    end
   end
 
   defp game_from_params(%{"team_id" => team_id, "channel_id" => channel_id, "user_id" => user_id}) do

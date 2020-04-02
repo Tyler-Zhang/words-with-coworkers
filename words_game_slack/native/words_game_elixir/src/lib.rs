@@ -24,6 +24,7 @@ rustler::rustler_export_nifs!(
         ("new_game", 1, new_game),
         ("play_word", 4, play_word),
         ("check_dictionary", 1, check_dictionary),
+        ("get_current_player_idx", 1, get_current_player_idx),
     ],
     None
 );
@@ -181,4 +182,10 @@ pub fn check_dictionary<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>,
     let word: String = args[0].decode()?;
 
     Ok(words_game::check_dictionary(&word).encode(env))
+}
+
+pub fn get_current_player_idx<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>, Error> {
+    let game: words_game::Game = from_term::<Game>(args[0])?.into();
+
+    Ok(game.get_current_player_idx().encode(env))
 }

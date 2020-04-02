@@ -14,7 +14,7 @@ defmodule WordsGameSlack.Commands do
       "start" <> rest -> Commands.Start.parse(rest)
       "hand" <> rest -> Commands.Hand.parse(rest)
       "dict" <> rest -> Commands.Dict.parse(rest)
-      "quit" <> rest -> Commands.Dict.parse(rest)
+      "quit" <> rest -> Commands.Quit.parse(rest)
     end
   end
 

@@ -58,4 +58,8 @@ defmodule WordsGameSlack.GameSave do
       |> Ecto.Changeset.change(%{data: WordsGameElixir.serialize(new_words_game)})
       |> Repo.update
   end
+
+  def delete(%Game{} = game) do
+    game |> Repo.delete
+  end
 end

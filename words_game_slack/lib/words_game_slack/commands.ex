@@ -9,6 +9,7 @@ defmodule WordsGameSlack.Commands do
   def parse(@command_name, text) do
     case String.trim(text) do
       "help" <> rest -> Commands.Help.parse(rest)
+      "board" <> rest -> Commands.Board.parse(rest)
       "play" <> rest -> Commands.Play.parse(rest)
       "start" <> rest -> Commands.Start.parse(rest)
       "hand" <> rest -> Commands.Hand.parse(rest)
@@ -35,7 +36,7 @@ defmodule WordsGameSlack.Commands do
 
     # Etc /play 7,7 right ACTOR
     #           ^ parse this section
-    @regex ~r/^(\d+), ?(\d+) (right|down) (\w+)/
+    @regex ~r/^(\d+), ?(\d+) (right|down) (\w+)/i
 
     @spec parse(binary) :: {:error, String.t()} | {:ok, WordsGameSlack.Commands.Play.t()}
     def parse(text) do
@@ -49,6 +50,9 @@ defmodule WordsGameSlack.Commands do
     end
 
     defp create_play_command(start_x, start_y, dir, word) do
+      start_x = Integer.parse(start_x) |> elem(0)
+      start_y = Integer.parse(start_y) |> elem(0)
+
       %Play{
         start: {start_x, start_y},
         dir: String.downcase(dir),
@@ -106,7 +110,15 @@ defmodule WordsGameSlack.Commands do
     @type t :: %Quit{}
     defstruct []
 
-    @spec parse :: {:ok, WordsGameSlack.Commands.Quit.t()}
-    def parse(), do: {:ok, %Quit{}}
+    @spec parse(any) :: {:ok, WordsGameSlack.Commands.Quit.t()}
+    def parse(_), do: {:ok, %Quit{}}
+  end
+
+  defmodule Board do
+    @type t :: %Board{}
+    defstruct []
+
+    @spec parse(any) :: {:ok, WordsGameSlack.Commands.Board.t()}
+    def parse(_), do: {:ok, %Board{}}
   end
 end

@@ -4,6 +4,7 @@ extern crate words_game;
 extern crate serde;
 extern crate serde_rustler;
 
+use std::fmt;
 use rustler::{Encoder, Env, Error, Term};
 use serde::{Serialize, Deserialize};
 use serde_rustler::{from_term, to_term};
@@ -11,6 +12,7 @@ use serde_rustler::{from_term, to_term};
 mod atoms {
     rustler::rustler_atoms! {
         atom ok;
+        atom error;
         atom right;
         atom down;
     }
@@ -128,6 +130,19 @@ impl From<Game> for words_game::Game {
     }
 }
 
+macro_rules! handle_result {
+    ($result:expr, $env:expr) => {
+        match $result {
+            Ok(x) => x,
+            Err(e) => return to_elixir_err(e, $env)
+        }
+    }
+}
+
+fn to_elixir_err<'a, E: fmt::Display>(e: E, env: Env<'a>) -> Result<Term<'a>, Error> {
+    Ok((atoms::error(), format!("{}", e)).encode(env))
+}
+
 pub fn new_game<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>, Error> {
     let player_count: u64 = args[0].decode()?;
 
@@ -142,22 +157,21 @@ pub fn play_word<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>, Error>
     let direction: String = args[2].decode()?;
     let word: String = args[3].decode()?;
 
-    let play_word_result = game.play_word(
+    let play_word_result_result = game.play_word(
         words_game::Point::new(start_x, start_y),
         match &direction[..] {
             "right" => words_game::Direction::right(),
             "down" => words_game::Direction::down(),
-            _ => return Err(Error::RaiseTerm(Box::new("Direction can only be right or down")))
+            _ => return Ok((atoms::error(), "Direction can only be right or down").encode(env))
         },
         &word
-    ).map_err(|e| Error::RaiseTerm(Box::new(format!("{}", e))))?;
+    );
 
+    let play_word_result = handle_result!(play_word_result_result, env);
 
-    to_term(
-        env,
-        (
-            PlayWordResult::from(play_word_result),
-            Game::from(game)
-        )
-    ).map_err(Into::into)
+    Ok((
+        atoms::ok(),
+        to_term(env, PlayWordResult::from(play_word_result)).map_err(Into::<Error>::into)?,
+        to_term(env, Game::from(game)).map_err(Into::<Error>::into)?
+    ).encode(env))
 }

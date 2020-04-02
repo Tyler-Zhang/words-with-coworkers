@@ -25,8 +25,9 @@ defmodule WordsGameSlackWeb.Slack.CommandController do
         end
 
       case result do
+        {:ok, :ephemeral, data} -> respond(conn, data, true)
         {:ok, data} -> respond(conn, data)
-        {:error, reason} -> respond(conn, reason, "ephemeral")
+        {:error, reason} -> respond(conn, reason, true)
       end
     end
   end
@@ -38,12 +39,12 @@ defmodule WordsGameSlackWeb.Slack.CommandController do
            "channel_id" => channel_id,
            "user_id" => user_id,
            "user_name" => user_name
-         }
+         } = params
        ) do
     # Check to make sure the this user isn't already in a game
-    game = GameSave.get_game(team_id, channel_id, user_id)
+    game = game_from_params(params)
 
-    if game == nil do
+    if elem(game, 0) == :error do
       new_game =
         players
         |> List.insert_at(0, {user_id, user_name})
@@ -60,12 +61,58 @@ defmodule WordsGameSlackWeb.Slack.CommandController do
   defp execute_command(%Commands.Help{}, _),
     do: {:ok, WordsGameSlack.Slack.render_help()}
 
+  defp execute_command(%Commands.Board{}, params) do
+    with {:ok, game_save} = game_from_params(params) do
+      {:ok, :ephemeral, WordsGameSlack.Slack.render_board(game_save)}
+    end
+  end
+
+  defp execute_command(%Commands.Hand{}, %{"user_id" => user_id} = params) do
+    with {:ok, game_save} <- game_from_params(params),
+         {:ok, words_game} <- WordsGameElixir.deserialize(game_save) do
+      player_idx = GameSave.player_idx_in_game(game_save, user_id)
+
+      hand_tiles =
+        words_game.players
+        |> Enum.at(player_idx)
+        |> Map.get(:hand)
+        |> WordsGameSlack.Slack.render_tiles()
+
+      {:ok, :ephemeral, "Your hand: #{hand_tiles}"}
+    end
+  end
+
+  defp execute_command(%Commands.Play{start: start, dir: dir, word: word}, params) do
+    with {:ok, game_save} <- game_from_params(params),
+         {:ok, words_game} <- WordsGameElixir.deserialize(game_save),
+         {:ok, play_word_result, new_words_game} <-
+           words_game |> WordsGameElixir.play_word(start, dir, word),
+         {:ok, new_game_save} <- GameSave.update(game_save, new_words_game),
+         {:ok, game_render} <- WordsGameSlack.Slack.render_game(new_game_save) do
+      result_render =
+        WordsGameSlack.Slack.render_play_word_result(play_word_result, params["user_name"])
+
+      {:ok, "#{result_render}\n#{game_render}"}
+    end
+  end
+
+  defp game_from_params(%{"team_id" => team_id, "channel_id" => channel_id, "user_id" => user_id}) do
+    case GameSave.get_game(team_id, channel_id, user_id) do
+      nil -> {:error, "Game not found"}
+      game -> {:ok, game}
+    end
+  end
+
   defp check_has_keys(params) do
     Enum.all?(@expected_keys, &Map.has_key?(params, &1))
   end
 
-  defp respond(conn, data, type \\ "in_channel") do
-    data = %{response_type: type, text: data}
+  defp respond(conn, data, ephemeral \\ false) do
+    data = %{
+      response_type: if(ephemeral, do: "ephemeral", else: "in_channel"),
+      text: data
+    }
+
     json(conn, data)
   end
 end

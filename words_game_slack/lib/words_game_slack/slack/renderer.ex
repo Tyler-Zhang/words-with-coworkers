@@ -1,6 +1,6 @@
 defmodule WordsGameSlack.Slack.Renderer do
   alias WordsGameSlack.GameSave
-  alias WordsGameElixir.{Player, Board}
+  alias WordsGameElixir.{Player, Board, PlayWordResult}
 
   @command_name Application.get_env(:words_game_slack, :command_name)
 
@@ -32,7 +32,8 @@ defmodule WordsGameSlack.Slack.Renderer do
 
     cell_render =
       cells
-      |> render_tiles
+      |> String.codepoints
+      |> Enum.map(&render_tile/1)
       |> Enum.chunk_every(dim)
       |> Enum.map(&Enum.join/1)
       |> Enum.with_index()
@@ -101,6 +102,14 @@ in game:
 >`#{@command_name} play <word> <x>:<y> <right|down>` - To play a word
 >`#{@command_name} dict <word>` - To check if a word is valid
 >`#{@command_name} quit` - Quit the current game
+    "
+  end
+
+  def render_play_word_result(%PlayWordResult{} = result, player_name) do
+    ~s"
+#{player_name} player the words:
+#{result.words |> Enum.join("\n")}
+For #{result.score} points
     "
   end
 end

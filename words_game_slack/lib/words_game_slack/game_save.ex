@@ -11,7 +11,8 @@ defmodule WordsGameSlack.GameSave do
             where: p.user_id == ^user_id
               and g.channel_id == ^channel_id
               and g.team_id == ^team_id,
-            order_by: p.index
+            order_by: p.index,
+            preload: [players: p]
 
     query |> Repo.one
   end
@@ -20,6 +21,12 @@ defmodule WordsGameSlack.GameSave do
     Enum.any?(game.players, fn player -> player.user_id == player_id end)
   end
 
+  def player_idx_in_game(%Game{} = game, user_id) do
+    game.players
+      |> Enum.find_index(fn p -> p.user_id == user_id end)
+  end
+
+  @spec create_new_game([any], any, any) :: any
   def create_new_game(players, team_id, channel_id) do
     # Create the game
     words_game = WordsGameElixir.new_game(length(players))
@@ -44,5 +51,11 @@ defmodule WordsGameSlack.GameSave do
     )
       |> Ecto.Changeset.put_assoc(:players, players)
       |> Repo.insert
+  end
+
+  def update(%Game{} = game, %WordsGameElixir{} = new_words_game) do
+    game
+      |> Ecto.Changeset.change(%{data: WordsGameElixir.serialize(new_words_game)})
+      |> Repo.update
   end
 end

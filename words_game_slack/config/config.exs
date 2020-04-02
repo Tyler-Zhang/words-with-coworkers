@@ -18,6 +18,8 @@ config :words_game_slack, WordsGameSlackWeb.Endpoint,
   pubsub: [name: WordsGameSlack.PubSub, adapter: Phoenix.PubSub.PG2],
   live_view: [signing_salt: "10T9K6bu"]
 
+config :words_game_slack, :command_name, "/wordswith"
+
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",

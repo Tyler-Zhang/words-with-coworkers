@@ -1,0 +1,18 @@
+# For development purposes only
+version: "3"
+services:
+  postgres:
+    image: postgres:12
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      # This is to create the db
+      POSTGRES_PASSWORD: postgres
+      # This is for PSQL
+      PGPASSWORD: password
+      POSTGRES_DB: words_game_slack_dev
+    volumes:
+      - "postgres-data:/var/lib/postgresql/data"
+volumes:
+  postgres-data: {}

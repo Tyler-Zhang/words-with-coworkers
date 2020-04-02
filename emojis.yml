@@ -1,4 +1,4 @@
-# Use emojipacks cli tool ( https://github.com/lambtron/emojipacks )
+# Use this tool https://github.com/jackellenberger/emojme
 # To load these into your slack workspace
 title: slackmoji-scrabble-letters
 emojis:

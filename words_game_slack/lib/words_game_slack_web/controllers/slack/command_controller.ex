@@ -96,6 +96,12 @@ defmodule WordsGameSlackWeb.Slack.CommandController do
     end
   end
 
+  defp execute_command(%Commands.Dict{word: word}, _) do
+    is_valid = word |> String.upcase |> WordsGameElixir.check_dictionary
+
+    { :ok, :ephemeral, "#{word} is #{if is_valid, do: "valid", else: "not valid"}"}
+  end
+
   defp game_from_params(%{"team_id" => team_id, "channel_id" => channel_id, "user_id" => user_id}) do
     case GameSave.get_game(team_id, channel_id, user_id) do
       nil -> {:error, "Game not found"}

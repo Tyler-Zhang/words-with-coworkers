@@ -156,3 +156,8 @@ impl Game {
         Ok(Self(board))
     }
 }
+
+#[wasm_bindgen]
+pub fn check_dictionary(s: &str) -> bool {
+    words_game::check_dictionary(s)
+}

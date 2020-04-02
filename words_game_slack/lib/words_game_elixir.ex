@@ -15,6 +15,9 @@ defmodule WordsGameElixir do
       ),
       do: :erlang.nif_error(:nif_not_loaded)
 
+  @spec check_dictionary(String.t) :: bool
+  def check_dictionary(_word), do: :erlang.nif_error(:nif_not_loaded)
+
   @type t :: %WordsGameElixir{
           board: String.t(),
           players: Player.t(),

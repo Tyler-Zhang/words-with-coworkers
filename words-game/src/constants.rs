@@ -45,6 +45,10 @@ lazy_static! {
     };
 }
 
+pub fn check_dictionary(s: &str) -> bool {
+    DICTIONARY.contains(s)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -23,6 +23,7 @@ rustler::rustler_export_nifs!(
     [
         ("new_game", 1, new_game),
         ("play_word", 4, play_word),
+        ("check_dictionary", 1, check_dictionary),
     ],
     None
 );
@@ -174,4 +175,10 @@ pub fn play_word<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>, Error>
         to_term(env, PlayWordResult::from(play_word_result)).map_err(Into::<Error>::into)?,
         to_term(env, Game::from(game)).map_err(Into::<Error>::into)?
     ).encode(env))
+}
+
+pub fn check_dictionary<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>, Error> {
+    let word: String = args[0].decode()?;
+
+    Ok(words_game::check_dictionary(&word).encode(env))
 }

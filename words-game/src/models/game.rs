@@ -184,7 +184,7 @@ mod tests {
         let game = Game::new(2);
 
         let serialized = game.serialize();
-        let deserialized = Game::form_serialized(&serialized).unwrap();
+        let deserialized = Game::from_serialized(&serialized).unwrap();
 
         assert_eq!(game.players.len(), deserialized.players.len());
     }

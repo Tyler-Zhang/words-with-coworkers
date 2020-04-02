@@ -53,7 +53,7 @@ defmodule WordsGameSlack.Commands do
       %Start {
         players: Enum.map(
           players,
-          fn ([_, id, name]) -> [id, name] end
+          fn ([_, id, name]) -> {id, name} end
         )
       }
     end

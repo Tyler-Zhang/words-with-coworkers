@@ -36,7 +36,7 @@ defmodule WordsGameSlack.Commands do
 
     # Etc /play 7,7 right ACTOR
     #           ^ parse this section
-    @regex ~r/^(\d+), ?(\d+) (right|down) (\w+)/i
+    @regex ~r/^(\w+) (\d+)(?:,|:) ?(\d+) (right|down)/i
 
     @spec parse(binary) :: {:error, String.t()} | {:ok, WordsGameSlack.Commands.Play.t()}
     def parse(text) do
@@ -44,7 +44,7 @@ defmodule WordsGameSlack.Commands do
         nil ->
           {:error, "command is invalid"}
 
-        [_, start_x, start_y, dir, word] ->
+        [_, word, start_x, start_y, dir] ->
           {:ok, create_play_command(start_x, start_y, dir, word)}
       end
     end

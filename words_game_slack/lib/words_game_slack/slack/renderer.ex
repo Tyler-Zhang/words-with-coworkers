@@ -98,7 +98,6 @@ Here is how you use the Words with Coworkers bot
 in game:
 >`#{@command_name} board` - Show the state of the board
 >`#{@command_name} hand` - Shows you your hand
->`#{@command_name} hand scramble` - Scrambles the letters in your hand
 >`#{@command_name} play <word> <x>:<y> <right|down>` - To play a word
 >`#{@command_name} dict <word>` - To check if a word is valid
 >`#{@command_name} quit` - Quit the current game

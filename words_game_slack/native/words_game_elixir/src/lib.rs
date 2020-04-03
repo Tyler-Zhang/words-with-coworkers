@@ -1,4 +1,3 @@
-#[macro_use]
 extern crate rustler;
 extern crate words_game;
 extern crate serde;

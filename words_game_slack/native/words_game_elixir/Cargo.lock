@@ -339,6 +339,8 @@ dependencies = [
 [[package]]
 name = "words-game"
 version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "aa5191fe22dc224760b2c2239aaf73ce359c694a23e870e3a9acf02a2a594376"
 dependencies = [
  "lazy_static",
  "rand",

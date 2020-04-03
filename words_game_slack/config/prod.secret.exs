@@ -39,3 +39,9 @@ config :words_game_slack, WordsGameSlackWeb.Endpoint,
 #
 # Then you can assemble a release by calling `mix release`.
 # See `mix help release` for more information.
+
+config :words_game_slack, :slack_oauth,
+  app_id: System.get_env("SLACK_APP_ID"),
+  client_id: System.get_env("SLACK_CLIENT_ID"),
+  client_secret: System.get_env("SLACK_CLIENT_SECRET"),
+  singing_secret: System.get_env("SLACK_SINGING_SECRET")

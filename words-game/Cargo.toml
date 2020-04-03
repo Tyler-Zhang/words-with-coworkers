@@ -3,6 +3,10 @@ name = "words-game"
 version = "0.1.0"
 authors = ["tyler <tztylerzhang@gmail.com>"]
 edition = "2018"
+license = "LICENSE_APACHE"
+description = "Spelling game implementation"
+repository = "https://github.com/Tyler-Zhang/words-with-coworkers"
+
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

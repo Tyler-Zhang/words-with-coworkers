@@ -1,0 +1,8 @@
+main:
+  - words-game/**/*
+
+wasm:
+  - words-game-wasm/**/*
+
+slack:
+  - words_game_slack/**/*

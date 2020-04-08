@@ -24,6 +24,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Build image
+        working_directory: ./words_game_slack
         run: docker build . --file Dockerfile --tag image
 
       - name: Log into registry

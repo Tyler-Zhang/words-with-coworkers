@@ -15,7 +15,7 @@ defmodule WordsGameElixir do
       ),
       do: :erlang.nif_error(:nif_not_loaded)
 
-  @spec check_dictionary(String.t) :: bool
+  @spec check_dictionary(String.t()) :: bool
   def check_dictionary(_word), do: :erlang.nif_error(:nif_not_loaded)
 
   @spec check_dictionary(WordsGameElixir.t()) :: number

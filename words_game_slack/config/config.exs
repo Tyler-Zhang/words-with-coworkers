@@ -31,11 +31,12 @@ config :phoenix, :json_library, Jason
 
 config :words_game_slack, :command_name, "/wordswithd"
 
-config :sentry, dsn: "https://2a2e3ccd849741248609de0de1a4aa82@sentry.tylerzhang.com/2",
-   included_environments: [:dev, :prod],
-   environment_name: Mix.env,
-   enable_source_code_context: true,
-   root_source_code_path: File.cwd!()
+config :sentry,
+  dsn: "https://2a2e3ccd849741248609de0de1a4aa82@sentry.tylerzhang.com/2",
+  included_environments: [:dev, :prod],
+  environment_name: Mix.env(),
+  enable_source_code_context: true,
+  root_source_code_path: File.cwd!()
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

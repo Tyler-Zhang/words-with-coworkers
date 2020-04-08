@@ -11,7 +11,7 @@ defmodule WordsGameSlack.MixProject do
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       rustler_crates: [words_game_elixir: []],
-      deps: deps(),
+      deps: deps()
     ]
   end
 
@@ -46,7 +46,7 @@ defmodule WordsGameSlack.MixProject do
       {:plug_cowboy, "~> 2.0"},
       {:rustler, "~> 0.21.0"},
       {:poison, "~> 3.1"},
-      {:sentry, "~> 7.0"},
+      {:sentry, "~> 7.0"}
     ]
   end
 

@@ -82,7 +82,10 @@ defmodule WordsGameSlackWeb.Slack.CommandController do
     end
   end
 
-  defp execute_command(%Commands.Play{start: start, dir: dir, word: word}, %{"user_id" => user_id} = params) do
+  defp execute_command(
+         %Commands.Play{start: start, dir: dir, word: word},
+         %{"user_id" => user_id} = params
+       ) do
     with {:ok, game_save} <- game_from_params(params),
          {:ok, words_game} <- WordsGameElixir.deserialize(game_save),
          :ok <- ensure_player_turn(words_game, GameSave.player_idx_in_game(game_save, user_id)),
@@ -98,9 +101,9 @@ defmodule WordsGameSlackWeb.Slack.CommandController do
   end
 
   defp execute_command(%Commands.Dict{word: word}, _) do
-    is_valid = word |> String.upcase |> WordsGameElixir.check_dictionary
+    is_valid = word |> String.upcase() |> WordsGameElixir.check_dictionary()
 
-    { :ok, :ephemeral, "#{word} is #{if is_valid, do: "valid", else: "not valid"}"}
+    {:ok, :ephemeral, "#{word} is #{if is_valid, do: "valid", else: "not valid"}"}
   end
 
   defp execute_command(%Commands.Quit{}, params) do

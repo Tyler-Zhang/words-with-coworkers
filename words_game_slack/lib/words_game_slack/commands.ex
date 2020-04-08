@@ -4,7 +4,7 @@ defmodule WordsGameSlack.Commands do
   @command_name Application.get_env(:words_game_slack, :command_name)
 
   @spec parse(any, any) ::
-          {:error, String.t}
+          {:error, String.t()}
           | {:ok, Commands.Help.t() | Commands.Start.t() | Commands.Play.t()}
   def parse(@command_name, text) do
     case String.trim(text) do
@@ -15,7 +15,7 @@ defmodule WordsGameSlack.Commands do
       "dict" <> rest -> Commands.Dict.parse(rest)
       "quit" <> rest -> Commands.Quit.parse(rest)
       "help" <> rest -> Commands.Help.parse(rest)
-      _ -> { :error, "Command not recoginzed" }
+      _ -> {:error, "Command not recoginzed"}
     end
   end
 
@@ -90,7 +90,7 @@ defmodule WordsGameSlack.Commands do
 
   defmodule Hand do
     @type t :: %Hand{shuffle: bool}
-    defstruct [shuffle: false]
+    defstruct shuffle: false
 
     @spec parse(any) :: {:ok, WordsGameSlack.Commands.Hand.t()}
     def parse(" shuffle" <> _), do: {:ok, %Hand{shuffle: true}}
@@ -98,11 +98,11 @@ defmodule WordsGameSlack.Commands do
   end
 
   defmodule Dict do
-    @type t :: %Dict{word: String.t}
+    @type t :: %Dict{word: String.t()}
     @enforce_keys [:word]
     defstruct [:word]
 
-    @spec parse(any) :: {:error, String.t} | {:ok, WordsGameSlack.Commands.Dict.t()}
+    @spec parse(any) :: {:error, String.t()} | {:ok, WordsGameSlack.Commands.Dict.t()}
     def parse(" " <> word), do: {:ok, %Dict{word: word}}
     def parse(_), do: {:error, "Please specify a word"}
   end

@@ -32,7 +32,7 @@ defmodule WordsGameSlack.Slack.Renderer do
 
     cell_render =
       cells
-      |> String.codepoints
+      |> String.codepoints()
       |> Enum.map(&render_tile/1)
       |> Enum.chunk_every(dim)
       |> Enum.map(&Enum.join/1)
@@ -48,7 +48,7 @@ defmodule WordsGameSlack.Slack.Renderer do
     "#{name}: #{score} points"
   end
 
-  @spec render_tiles(String.t) :: String.t
+  @spec render_tiles(String.t()) :: String.t()
   def render_tiles(str) do
     str |> String.codepoints() |> Enum.map(&render_tile/1) |> Enum.join()
   end

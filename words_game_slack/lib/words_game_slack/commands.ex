@@ -8,13 +8,14 @@ defmodule WordsGameSlack.Commands do
           | {:ok, Commands.Help.t() | Commands.Start.t() | Commands.Play.t()}
   def parse(@command_name, text) do
     case String.trim(text) do
-      "help" <> rest -> Commands.Help.parse(rest)
       "board" <> rest -> Commands.Board.parse(rest)
       "play" <> rest -> Commands.Play.parse(rest)
       "start" <> rest -> Commands.Start.parse(rest)
       "hand" <> rest -> Commands.Hand.parse(rest)
       "dict" <> rest -> Commands.Dict.parse(rest)
       "quit" <> rest -> Commands.Quit.parse(rest)
+      "help" <> rest -> Commands.Help.parse(rest)
+      _ -> { :error, "Command not recoginzed" }
     end
   end
 

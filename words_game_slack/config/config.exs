@@ -18,15 +18,24 @@ config :words_game_slack, WordsGameSlackWeb.Endpoint,
   pubsub: [name: WordsGameSlack.PubSub, adapter: Phoenix.PubSub.PG2],
   live_view: [signing_salt: "10T9K6bu"]
 
-config :words_game_slack, :command_name, "/wordswith"
-
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
 
+config :logger,
+  backends: [:console, Sentry.LoggerBackend]
+
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
+
+config :words_game_slack, :command_name, "/wordswithd"
+
+config :sentry, dsn: "https://2a2e3ccd849741248609de0de1a4aa82@sentry.tylerzhang.com/2",
+   included_environments: [:dev, :prod],
+   environment_name: Mix.env,
+   enable_source_code_context: true,
+   root_source_code_path: File.cwd!()
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

@@ -1,0 +1,25 @@
+config:
+    target: https://words-game-slack.tylerzhang.com
+    phases:
+        - duration: 60
+          arrivalRate: 10
+        - duration: 60
+          arrivalRate: 40
+    defaults:
+        headers:
+            Content-Type: "application/json"
+            Accept: "application/json, */*"
+
+scenarios:
+    - flow:
+        - post:
+            url: "/slack/command"
+            json:
+                channel_id: "CRZ94CWEQ"
+                command: "/wordswith"
+                text: "hand"
+                response_url: ""
+                token: ""
+                user_id: "URLUY4SCS"
+                user_name: "me1"
+                team_id: "TS1UNJ8F8"

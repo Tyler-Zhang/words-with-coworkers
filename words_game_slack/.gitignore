@@ -36,3 +36,5 @@ npm-debug.log
 /priv/native/
 
 .elixir_ls/
+
+config/env.exs

@@ -1,0 +1,21 @@
+name: words-game
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    paths: ["words-game/*"]
+
+jobs:
+  test:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build
+      working-directory: ./words-game
+      run: cargo build --verbose
+    - name: Run tests
+      working-directory: ./words-game
+      run: cargo test --verbose

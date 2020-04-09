@@ -24,22 +24,17 @@ jobs:
 
       - name: Setup github env variables
         run: |
-          env
-
           GIT_SHA=$(git rev-parse --short "$GITHUB_SHA")
-          GIT_BRANCH=${GITHUB_REF##*/}
-
           echo GIT_SHA=$GIT_SHA
-          echo GIT_BRANCH=$GIT_BRANCH
           echo ::set-env name=GIT_SHA::$GIT_SHA
-          echo ::set-env name=GIT_BRANCH::$GIT_BRANCH
+          env
 
       - name: Load up cache
         uses: actions/cache@v1
         id: docker-cache
         with:
           path: ${{ env.CACHE_DIR }}
-          key: docker-cache-${{ env.GIT_BRANCH }}
+          key: docker-cache-${{ env.GITHUB_HEAD_REF }}
           restore-keys: |
             docker-cache-master
             docker-cache
@@ -62,7 +57,7 @@ jobs:
         run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
 
       - name: Push image
-        if: env.GIT_BRANCH == 'master'
+        if: env.GITHUB_HEAD_REF == 'master'
         run: |
           IMAGE_ID=${{ secrets.DOCKER_USERNAME }}/$IMAGE_NAME
 

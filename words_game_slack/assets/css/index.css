@@ -1,0 +1,30 @@
+@font-face {
+    font-family: bungee;
+    src: url(../fonts/Bungee-Regular.ttf);
+}
+
+div#index {
+    width: 100vw;
+    height: 100vh;
+    background: #f46b45;  /* fallback for old browsers */
+    background: -webkit-linear-gradient(to right, #eea849, #f46b45);  /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(to right, #eea849, #f46b45); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+    overflow:hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.content {
+    display: flex;
+}
+
+.left-content {
+
+}
+
+.title {
+    font-family: bungee;
+    font-size: 50px;
+    color: white;
+}

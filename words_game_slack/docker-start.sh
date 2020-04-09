@@ -1,6 +1,6 @@
 #!/bin/bash
 
 # Create database
-mix ecto.migrate
+bin/default eval "WordsGameSlack.Release.migrate"
 
 exec "$@"

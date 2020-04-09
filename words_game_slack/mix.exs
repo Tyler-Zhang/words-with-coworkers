@@ -11,7 +11,8 @@ defmodule WordsGameSlack.MixProject do
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       rustler_crates: [words_game_elixir: []],
-      deps: deps()
+      deps: deps(),
+      releases: releases()
     ]
   end
 
@@ -22,6 +23,15 @@ defmodule WordsGameSlack.MixProject do
     [
       mod: {WordsGameSlack.Application, []},
       extra_applications: [:logger, :runtime_tools]
+    ]
+  end
+
+  def releases do
+    [
+      default: [
+        include_executables_for: [:unix],
+        applications: [runtime_tools: :permanent]
+      ]
     ]
   end
 

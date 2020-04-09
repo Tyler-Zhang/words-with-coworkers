@@ -26,4 +26,6 @@ defmodule WordsGameSlack.Slack do
     do: Slack.Renderer.render_play_word_result(play_word_result, player_name)
 
   def oauth_authorize(code), do: Slack.Oauth.authorize(code)
+
+  def oauth_config(key), do: Slack.Config.get(key)
 end

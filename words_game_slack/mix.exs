@@ -46,7 +46,8 @@ defmodule WordsGameSlack.MixProject do
       {:plug_cowboy, "~> 2.0"},
       {:rustler, "~> 0.21.0"},
       {:poison, "~> 3.1"},
-      {:sentry, "~> 7.0"}
+      {:sentry, "~> 7.0"},
+      {:httpoison, "~> 1.6"},
     ]
   end
 

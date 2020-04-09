@@ -24,12 +24,13 @@ jobs:
 
       - name: Setup github env variables
         run: |
+          env
+
           GIT_SHA=$(git rev-parse --short "$GITHUB_SHA")
           GIT_BRANCH=${GITHUB_REF##*/}
 
           echo GIT_SHA=$GIT_SHA
           echo GIT_BRANCH=$GIT_BRANCH
-
           echo ::set-env name=GIT_SHA::$GIT_SHA
           echo ::set-env name=GIT_BRANCH::$GIT_BRANCH
 

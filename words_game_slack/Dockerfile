@@ -24,14 +24,14 @@ COPY priv priv
 RUN cd assets && npm install && npm run deploy
 RUN mix phx.digest
 
-# Rebuild sentry as it caches files
-RUN mix sentry_recompile
-
 # Build project
 COPY native native
 COPY lib lib
 RUN mix compile
 RUN mix release
+
+# Rebuild sentry as it caches files
+RUN mix sentry_recompile
 
 # === Release image ===
 FROM ubuntu:latest AS APP

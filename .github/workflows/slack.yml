@@ -20,6 +20,8 @@ jobs:
   push:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
+
       - name: Setup github env variables
         run: |
           GIT_SHA=$(git rev-parse --short "$GITHUB_SHA")
@@ -30,8 +32,6 @@ jobs:
 
           echo ::set-env name=GIT_SHA::$GIT_SHA
           echo ::set-env name=GIT_BRANCH::$GIT_BRANCH
-
-      - uses: actions/checkout@v2
 
       - name: Load up cache
         uses: actions/cache@v1

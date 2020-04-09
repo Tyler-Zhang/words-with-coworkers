@@ -23,7 +23,9 @@ jobs:
 
       - name: Build image
         working-directory: ./words_game_slack
-        run: docker build . --file Dockerfile --tag image
+        run: |
+          GIT_SHA=$(git rev-parse --short "$GITHUB_SHA")
+          docker build . --file Dockerfile --tag image --build-arg GIT_SHA=$GIT_SHA
 
       - name: Log into registry
         if: contains(github.ref, 'master')

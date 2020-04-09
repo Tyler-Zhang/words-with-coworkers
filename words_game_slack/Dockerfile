@@ -3,6 +3,9 @@ FROM tylerzhang/elixir-rust-node as BUILD
 RUN mkdir /app
 WORKDIR /app
 
+ARG GIT_SHA
+ENV GIT_SHA=${GIT_SHA}
+
 ENV MIX_ENV=prod
 
 # Intall hex and rebar
@@ -20,6 +23,9 @@ COPY assets assets
 COPY priv priv
 RUN cd assets && npm install && npm run deploy
 RUN mix phx.digest
+
+# Rebuild sentry as it caches files
+RUN mix sentry_recompile
 
 # Build project
 COPY native native

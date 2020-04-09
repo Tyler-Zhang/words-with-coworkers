@@ -25,7 +25,8 @@ defmodule WordsGameSlack.Slack.Oauth do
         %{
           access_token: body["access_token"],
           team_id: body["team_id"],
-          team_name: body["team_name"]
+          team_name: body["team_name"],
+          scope: body["scope"]
         }
       }
     else

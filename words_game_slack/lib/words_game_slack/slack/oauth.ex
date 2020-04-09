@@ -1,16 +1,36 @@
 defmodule WordsGameSlack.Slack.Oauth do
+  require Logger
   alias WordsGameSlack.Repo
   alias WordsGameSlack.Slack.Team
 
   @slack_oauth_url "https://slack.com/api/oauth.access"
 
   def authorize(code) do
-    with {:ok, response} <- request_token(code) do
-      IO.inspect(response)
-      response
-        |> Map.get("team_id")
+    with {:ok, response} <- request_token(code),
+         body <- Poison.decode!(response.body),
+         {:ok, slack_data} <- extract_slack_data(body) do
+      slack_data |> inspect |> Logger.debug
+
+      slack_data
+        |> Map.get(:team_id)
         |> get_team_by_id
-        |> upsert_team(response)
+        |> upsert_team(slack_data)
+    end
+  end
+
+  defp extract_slack_data(%{"ok" => ok} = body) do
+    if ok == true do
+      {
+        :ok,
+        %{
+          access_token: body["access_token"],
+          team_id: body["team_id"],
+          team_name: body["team_name"]
+        }
+      }
+    else
+      Sentry.capture_message("oauth failed", extra: %{body: body})
+      {:error, Map.get(body, "error")}
     end
   end
 

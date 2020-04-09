@@ -22,7 +22,9 @@ defmodule WordsGameSlackWeb.Router do
     scope "/slack", Slack do
       post "/command", CommandController, :create
 
-      get "/oauth_authorize", OauthController, :create
+      get "/oauth_authorize", OauthController, :oauth_authorize
+      get "/oauth_complete", OauthController, :oauth_complete
+      get "/oauth_failed", OauthController, :oauth_failed
     end
   end
 

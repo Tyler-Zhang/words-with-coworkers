@@ -22,8 +22,15 @@ jobs:
     steps:
       - name: Setup github env variables
         run: |
-          echo ::set-env GIT_SHA=$(git rev-parse --short "$GITHUB_SHA")
-          echo ::set-env GIT_BRANCH=${GITHUB_REF##*/}
+          GIT_SHA=$(git rev-parse --short "$GITHUB_SHA")
+          GIT_BRANCH=${GITHUB_REF##*/}
+
+          echo GIT_SHA=$GIT_SHA
+          echo GIT_BRANCH=$GIT_BRANCH
+
+          echo ::set-env name=GIT_SHA::$GIT_SHA
+          echo ::set-env name=GIT_BRANCH::$GIT_BRANCH
+
       - uses: actions/checkout@v2
 
       - name: Load up cache
@@ -31,7 +38,7 @@ jobs:
         id: docker-cache
         with:
           path: ${{ env.CACHE_DIR }}
-          key: docker-cache-${{env.GIT_BRANCH}}
+          key: docker-cache-${{ env.GIT_BRANCH }}
           restore-keys: |
             docker-cache-master
             docker-cache

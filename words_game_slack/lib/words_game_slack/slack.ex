@@ -24,4 +24,6 @@ defmodule WordsGameSlack.Slack do
   @spec render_play_word_result(WordsGameElixir.PlayWordResult.t(), String.t()) :: String.t()
   def render_play_word_result(play_word_result, player_name),
     do: Slack.Renderer.render_play_word_result(play_word_result, player_name)
+
+  def oauth_authorize(code), do: Slack.Oauth.authorize(code)
 end

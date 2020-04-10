@@ -12,6 +12,7 @@ on:
 env:
   # TODO: Change variable to your image's name.
   IMAGE_NAME: words_game_slack
+  CACHE_DIR: ./docker-cache
 
 jobs:
   # Push image to GitHub Packages.
@@ -21,18 +22,43 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Setup github env variables
+        run: |
+          GIT_SHA=$(git rev-parse --short "$GITHUB_SHA")
+          echo GIT_SHA=$GIT_SHA
+          echo ::set-env name=GIT_SHA::$GIT_SHA
+          env
+
+      - name: Load up cache
+        uses: actions/cache@v1
+        id: docker-cache
+        with:
+          path: ${{ env.CACHE_DIR }}
+          key: docker-cache-${{ github.head_ref }}
+          restore-keys: |
+            docker-cache-${{ github.base_ref }}
+            docker-cache-master
+            docker-cache
+
+      - name: Load saved image
+        if: steps.docker-cache.outputs.cache-hit == 'true'
+        run: '[ -e "$CACHE_DIR/image" ] && docker load -i "$CACHE_DIR/image"'
+
       - name: Build image
         working-directory: ./words_game_slack
         run: |
           GIT_SHA=$(git rev-parse --short "$GITHUB_SHA")
-          docker build . --file Dockerfile --tag image --build-arg GIT_SHA=$GIT_SHA
+          docker build . --file Dockerfile --tag image --cache-from image --build-arg GIT_SHA=$GIT_SHA
+
+          [ ! -d $CACHE_DIR ] && mkdir $CACHE_DIR
+          docker save -o $CACHE_DIR/image image
 
       - name: Log into registry
         if: contains(github.ref, 'master')
         run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
 
       - name: Push image
-        if: contains(github.ref, 'master')
+        if: env.GITHUB_HEAD_REF == 'master'
         run: |
           IMAGE_ID=${{ secrets.DOCKER_USERNAME }}/$IMAGE_NAME
 

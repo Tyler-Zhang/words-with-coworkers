@@ -1,4 +1,5 @@
 defmodule WordsGameSlack.GameSave do
+  require IEx
   alias WordsGameSlack.GameSave.{Game, Player}
   alias WordsGameSlack.Repo
 
@@ -8,11 +9,9 @@ defmodule WordsGameSlack.GameSave do
     query =
       from g in Game,
         join: p in Player,
-        on: p.game_id == g.id,
-        where:
-          p.user_id == ^user_id and
-            g.channel_id == ^channel_id and
-            g.team_id == ^team_id,
+        on: g.team_id == ^team_id and
+          g.channel_id == ^channel_id and
+          p.game_id == g.id,
         order_by: p.index,
         preload: [players: p]
 

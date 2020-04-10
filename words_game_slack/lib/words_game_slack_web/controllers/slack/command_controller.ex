@@ -62,8 +62,9 @@ defmodule WordsGameSlackWeb.Slack.CommandController do
     do: {:ok, WordsGameSlack.Slack.render_help()}
 
   defp execute_command(%Commands.Board{}, params) do
-    with {:ok, game_save} = game_from_params(params) do
-      {:ok, :ephemeral, WordsGameSlack.Slack.render_board(game_save)}
+    with {:ok, game_save} = game_from_params(params),
+         {:ok, rendering} <- WordsGameSlack.Slack.render_game(game_save) do
+      {:ok, :ephemeral, rendering}
     end
   end
 

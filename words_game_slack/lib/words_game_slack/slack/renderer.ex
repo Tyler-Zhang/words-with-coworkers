@@ -8,11 +8,14 @@ defmodule WordsGameSlack.Slack.Renderer do
     with {:ok, game_elixir} <- WordsGameElixir.deserialize(data) do
       board_render = render_board(game_elixir.board)
 
+      current_player_idx = game_elixir |> WordsGameElixir.get_current_player_idx
+
       # Zip together the library's version of player which has hand and score
       # and the GameSave player which contains the name and id
       player_render =
         Enum.zip(game_elixir.players, players)
-        |> Enum.map(&render_player/1)
+        |> Enum.with_index
+        |> Enum.map(fn {player, idx} -> render_player(player, idx == current_player_idx) end)
         |> Enum.join("\n")
 
       render = "#{board_render}\n#{player_render}"
@@ -43,9 +46,9 @@ defmodule WordsGameSlack.Slack.Renderer do
     "#{top_row}\n#{cell_render}"
   end
 
-  @spec render_player({Player.t(), GameSave.Player.t()}) :: String.t()
-  def render_player({%Player{score: score}, %GameSave.Player{user_name: name}}) do
-    "#{name}: #{score} points"
+  @spec render_player({Player.t(), GameSave.Player.t()}, bool) :: String.t()
+  def render_player({%Player{score: score}, %GameSave.Player{user_name: name}}, is_turn) do
+    "#{name}: #{score} points #{if is_turn, do: "[current turn]", else: ""}"
   end
 
   @spec render_tiles(String.t()) :: String.t()
@@ -106,7 +109,7 @@ in game:
 
   def render_play_word_result(%PlayWordResult{} = result, player_name) do
     ~s"
-#{player_name} player the words:
+#{player_name} played the words:
 #{result.words |> Enum.join("\n")}
 For #{result.score} points
     "

@@ -34,8 +34,9 @@ jobs:
         id: docker-cache
         with:
           path: ${{ env.CACHE_DIR }}
-          key: docker-cache-${{ env.GITHUB_HEAD_REF }}
+          key: docker-cache-${{ github.head_ref }}
           restore-keys: |
+            docker-cache-${{ github.base_ref }}
             docker-cache-master
             docker-cache
 

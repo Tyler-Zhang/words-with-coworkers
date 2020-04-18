@@ -1,0 +1,15 @@
+{
+  "name": "words-game-cli",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "@types/blessed": "^0.1.17",
+    "@types/react": "^16.9.34",
+    "@types/react-blessed": "^0.3.2",
+    "blessed": "^0.1.81",
+    "react": "^16.13.1",
+    "react-blessed": "^0.6.2",
+    "words-game-wasm": "file:../words-game-wasm/pkg"
+  }
+}
